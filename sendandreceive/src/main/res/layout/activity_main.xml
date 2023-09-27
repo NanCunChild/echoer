@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="409dp"
+        android:layout_height="672dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="58dp">
+
+        <TextView
+            android:id="@+id/receiveTextView"
+            android:layout_width="match_parent"
+            android:layout_height="226dp"
+            android:text="此处是接收到的信息" />
+
+        <TextView
+            android:id="@+id/sendTextView"
+            android:layout_width="match_parent"
+            android:layout_height="73dp"
+            android:text="此处是发送的信息" />
+
+        <Button
+            android:id="@+id/submitSend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="发送" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
