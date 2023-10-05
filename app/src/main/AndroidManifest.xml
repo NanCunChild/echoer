@@ -2,12 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.BLUETOOTH"
-        tools:ignore="CoarseFineLocation" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <!-- 先前的蓝牙权限需求-->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!-- 安卓12新增的蓝牙权限-->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/> <!-- 需要定位权限用于蓝牙扫描 -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <!-- 定位权限， 蓝牙搜索需要-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
