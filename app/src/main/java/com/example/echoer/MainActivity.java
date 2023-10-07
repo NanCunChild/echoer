@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -121,6 +123,8 @@ public class MainActivity extends Activity implements BluetoothStateListener {
             mbluetoothSupportText.setText("支持蓝牙");
             // 获取已配对的设备
             Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+
+
             // 检查已配对的设备数量
             if (pairedDevices.size() > 0) {
                 // 循环遍历并添加设备到适配器
@@ -131,9 +135,23 @@ public class MainActivity extends Activity implements BluetoothStateListener {
             } else {
                 // 没有找到已配对的设备时显示提示
                 Toast.makeText(this, "没有配对的设备", Toast.LENGTH_LONG).show();
+                mArrayAdapter.add("未检测到设备");
             }
         }
     }
+
+//    private final BroadcastReceiver mReceiver2 = new BroadcastReceiver() {
+//        public void onReceive(Context context, Intent intent) {
+//            String action = intent.getAction();
+//            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+//                // Discovery has found a device. Get the BluetoothDevice object and its info from the Intent.
+//                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//                String deviceName = device.getName();
+//                String deviceAddress = device.getAddress(); // MAC address
+//                mArrayAdapter.add(deviceName + "\n" + deviceAddress);
+//            }
+//        }
+//    };
 
 
     private void onRequestPermissions() {

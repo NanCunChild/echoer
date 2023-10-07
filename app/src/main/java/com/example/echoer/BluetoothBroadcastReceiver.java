@@ -40,6 +40,7 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
                     // 蓝牙正在开启
                     break;
             }
+
         }
     }
 }
