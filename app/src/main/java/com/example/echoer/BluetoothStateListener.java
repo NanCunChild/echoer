@@ -1,12 +1,8 @@
 package com.example.echoer;
 
 public interface BluetoothStateListener {
-    static void onBluetoothStateOn() {
+    void onBluetoothStateOn();
 
-    }
-
-    static void onBluetoothStateOff() {
-
-    }
+    void onBluetoothStateOff();
 }
 

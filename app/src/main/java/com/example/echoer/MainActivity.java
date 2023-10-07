@@ -27,17 +27,19 @@ public class MainActivity extends Activity implements BluetoothStateListener {
     // 定义数组适配器
     private ArrayAdapter<String> mArrayAdapter;
     private static final int PERMISSION_REQUEST_CODE = 1; // 权限请求码
-    private final BroadcastReceiver mReceiver = new BluetoothBroadcastReceiver();
+    private final BroadcastReceiver mReceiver = new BluetoothBroadcastReceiver(this);
+
+
     private BluetoothBroadcastReceiver bluetoothStateReceiver;
 
-
+    @Override
     public void onBluetoothStateOn() {
         TextView mbluetoothStatusText = (TextView) findViewById(R.id.bluetoothStatus);
         System.out.println("蓝牙已开启");
         mbluetoothStatusText.setText("蓝牙已开启");
     }
 
-
+    @Override
     public void onBluetoothStateOff() {
         TextView mbluetoothStatusText = (TextView) findViewById(R.id.bluetoothStatus);
         System.out.println("蓝牙已关闭");
@@ -71,10 +73,26 @@ public class MainActivity extends Activity implements BluetoothStateListener {
         unregisterReceiver(bluetoothStateReceiver);
     }
 
+//    private void checkInitialBluetoothState() {
+//        TextView mbluetoothStatusText = (TextView) findViewById(R.id.bluetoothStatus);
+//        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+//        if (bluetoothAdapter != null) {
+//            // 设备支持蓝牙
+//            if (bluetoothAdapter.isEnabled()) {
+//                onBluetoothStateOn();  // 蓝牙已启用
+//            } else {
+//                onBluetoothStateOff(); // 蓝牙已禁用
+//            }
+//        } else {
+//            // 设备不支持蓝牙
+//            mbluetoothStatusText.setText("设备不支持蓝牙");
+//        }
+//    }
 
-    private void blueToothScan(){
+
+    private void blueToothScan() {
+
         TextView mbluetoothSupportText = (TextView) findViewById(R.id.bluetoothSupport);
-
         Spinner mDevicesSpinner = (Spinner) findViewById(R.id.devicesSpinner);
 
         // 实例化数组适配器
@@ -85,7 +103,7 @@ public class MainActivity extends Activity implements BluetoothStateListener {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // 注册 BroadcastReceiver，可以实时检测蓝牙开关
-        bluetoothStateReceiver=new BluetoothBroadcastReceiver();
+        bluetoothStateReceiver = new BluetoothBroadcastReceiver(this);
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(bluetoothStateReceiver, filter);
 
@@ -95,6 +113,11 @@ public class MainActivity extends Activity implements BluetoothStateListener {
             Toast.makeText(this, "此设备不支持蓝牙", Toast.LENGTH_LONG).show();
             finish();
         } else {
+            if (mBluetoothAdapter.isEnabled()) {
+                onBluetoothStateOn();  // 蓝牙已启用
+            } else {
+                onBluetoothStateOff(); // 蓝牙已禁用
+            }
             mbluetoothSupportText.setText("支持蓝牙");
             // 获取已配对的设备
             Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
@@ -135,17 +158,17 @@ public class MainActivity extends Activity implements BluetoothStateListener {
         }
 
         // API 版本兼容处理：特殊的权限调用————
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){ // 以下都需要API版本在31以上才行
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN)!= PackageManager.PERMISSION_GRANTED){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // 以下都需要API版本在31以上才行
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
                 permissionsNeeded.add(Manifest.permission.BLUETOOTH_SCAN);
             }
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)!= PackageManager.PERMISSION_GRANTED){
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 permissionsNeeded.add(Manifest.permission.BLUETOOTH_CONNECT);
             }
         }
 
-        System.out.println("Build Version:"+Build.VERSION.SDK_INT);
-        System.out.println("Permission Needed:"+permissionsNeeded);
+        System.out.println("Build Version:" + Build.VERSION.SDK_INT);
+        System.out.println("Permission Needed:" + permissionsNeeded);
 
         if (!permissionsNeeded.isEmpty()) {
             ActivityCompat.requestPermissions(this,
