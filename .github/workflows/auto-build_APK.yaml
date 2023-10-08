@@ -1,4 +1,4 @@
-name: Android Auto Build
+name: Android Build
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v2
       with:
-        java-version: 'adopt@1.20'  # 指定 Java 20 版本
+        java-version: '1.20'  # 指定 Java 20 版本
 
     - name: Build with Gradle
       run: ./gradlew build
