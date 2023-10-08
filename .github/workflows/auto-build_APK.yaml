@@ -3,11 +3,11 @@ name: Android Auto Build
 on:
   push:
     branches:
-      - master  # 只有在 master 分支提交代码时触发
+      - master
 
 jobs:
   build:
-    name: Build and Package
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -17,16 +17,10 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v2
       with:
-        java-version: '20'  # 指定所需的 Java 版本
+        java-version: 'adopt@1.20'  # 指定 Java 20 版本
 
     - name: Build with Gradle
-      run: ./gradlew build  # 执行 Gradle 构建
+      run: ./gradlew build
 
     - name: Package APK
-      run: ./gradlew bundleRelease  # 执行打包命令
-
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: app-release
-        path: app/build/outputs/bundle/release/app-release.aab  # 上传生成的 APK 或 AAB 文件
+      run: ./gradlew bundleRelease
