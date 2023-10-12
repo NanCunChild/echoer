@@ -4,9 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -26,26 +23,25 @@ import java.util.Set;
 public class MainActivity extends Activity implements BluetoothStateListener {
     // 定义蓝牙适配器
     private BluetoothAdapter mBluetoothAdapter;
+    TextView mBluetoothStatusText = (TextView) findViewById(R.id.bluetoothStatus);
     // 定义数组适配器
-    private ArrayAdapter<String> mArrayAdapter;
+    private ArrayAdapter<String> mScannedDevices;
     private static final int PERMISSION_REQUEST_CODE = 1; // 权限请求码
-    private final BroadcastReceiver mReceiver = new BluetoothBroadcastReceiver(this);
+//    private final BroadcastReceiver mReceiver = new BluetoothBroadcastReceiver(this);
 
 
     private BluetoothBroadcastReceiver bluetoothStateReceiver;
 
     @Override
     public void onBluetoothStateOn() {
-        TextView mbluetoothStatusText = (TextView) findViewById(R.id.bluetoothStatus);
         System.out.println("蓝牙已开启");
-        mbluetoothStatusText.setText("蓝牙已开启");
+        mBluetoothStatusText.setText("蓝牙已开启");
     }
 
     @Override
     public void onBluetoothStateOff() {
-        TextView mbluetoothStatusText = (TextView) findViewById(R.id.bluetoothStatus);
         System.out.println("蓝牙已关闭");
-        mbluetoothStatusText.setText("蓝牙已关闭");
+        mBluetoothStatusText.setText("蓝牙已关闭");
     }
 
     @Override
@@ -98,9 +94,9 @@ public class MainActivity extends Activity implements BluetoothStateListener {
         Spinner mDevicesSpinner = (Spinner) findViewById(R.id.devicesSpinner);
 
         // 实例化数组适配器
-        mArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
+        mScannedDevices = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
         // 设置适配器到下拉列表
-        mDevicesSpinner.setAdapter(mArrayAdapter);
+        mDevicesSpinner.setAdapter(mScannedDevices);
         // 获取默认蓝牙适配器
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -129,13 +125,13 @@ public class MainActivity extends Activity implements BluetoothStateListener {
             if (pairedDevices.size() > 0) {
                 // 循环遍历并添加设备到适配器
                 for (BluetoothDevice device : pairedDevices) {
-                    mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                    mScannedDevices.add(device.getName() + "\n" + device.getAddress());
                     System.out.println(device);
                 }
             } else {
                 // 没有找到已配对的设备时显示提示
                 Toast.makeText(this, "没有配对的设备", Toast.LENGTH_LONG).show();
-                mArrayAdapter.add("未检测到设备");
+                mScannedDevices.add("未检测到设备");
             }
         }
     }
