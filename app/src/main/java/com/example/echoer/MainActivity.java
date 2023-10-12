@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -20,55 +21,55 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class MainActivity extends Activity implements BluetoothStateListener {
-    // 定义蓝牙适配器
-    private BluetoothAdapter mBluetoothAdapter;
-    TextView mBluetoothStatusText = (TextView) findViewById(R.id.bluetoothStatus);
-    // 定义数组适配器
-    private ArrayAdapter<String> mScannedDevices;
-    private static final int PERMISSION_REQUEST_CODE = 1; // 权限请求码
-//    private final BroadcastReceiver mReceiver = new BluetoothBroadcastReceiver(this);
-
-
-    private BluetoothBroadcastReceiver bluetoothStateReceiver;
+public class MainActivity extends Activity implements UIFlasher {
+    private BluetoothAdapter mBluetoothAdapter;// 定义蓝牙适配器
+    private TextView mBluetoothSupportText; //设备是否支持蓝牙
+    private TextView mBluetoothStatusText; //蓝牙是否打开
+    private Spinner mScannedDevicesSpinner;
+    private ArrayAdapter<String> mArrayAdapter;// 定义数组适配器
+    private static final int PERMISSION_REQUEST_CODE = 1; // 权限请求码，之后改
+    private final BroadcastReceiver mReceiver = new BroadcastEventReceiver(this);
+    private BroadcastEventReceiver bluetoothStateReceiver;
 
     @Override
-    public void onBluetoothStateOn() {
-        System.out.println("蓝牙已开启");
-        mBluetoothStatusText.setText("蓝牙已开启");
-    }
-
-    @Override
-    public void onBluetoothStateOff() {
-        System.out.println("蓝牙已关闭");
-        mBluetoothStatusText.setText("蓝牙已关闭");
+    public void detectBluetoothState(boolean isOn) {
+        if (isOn) {
+            System.out.println("detectBluetoothState：蓝牙已开启");
+            mBluetoothStatusText.setText("蓝牙已开启");
+        } else {
+            System.out.println("detectBluetoothState：蓝牙已关闭");
+            mBluetoothStatusText.setText("蓝牙已关闭");
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
+        mBluetoothSupportText = (TextView) findViewById(R.id.bluetoothSupport);
+        mBluetoothStatusText = (TextView) findViewById(R.id.bluetoothStatus);
+        mScannedDevicesSpinner = (Spinner) findViewById(R.id.devicesSpinner);
         System.out.println("Ready to require permissions...");
-        onRequestPermissions();
+        if(checkPermissions(true)) {
+            startBluetoothScan();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // 注销 BroadcastReceiver
-        unregisterReceiver(bluetoothStateReceiver);
+        unregisterReceiver(bluetoothStateReceiver); // 注销 BroadcastReceiver
     }
 
 //    private void checkInitialBluetoothState() {
@@ -88,38 +89,31 @@ public class MainActivity extends Activity implements BluetoothStateListener {
 //    }
 
 
-    private void blueToothScan() {
+    private void startBluetoothScan() {
+        mScannedDevicesSpinner.setAdapter(mArrayAdapter);// 设置适配器到下拉列表
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();// 获取默认蓝牙适配器
 
-        TextView mbluetoothSupportText = (TextView) findViewById(R.id.bluetoothSupport);
-        Spinner mDevicesSpinner = (Spinner) findViewById(R.id.devicesSpinner);
-
-        // 实例化数组适配器
-        mScannedDevices = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-        // 设置适配器到下拉列表
-        mDevicesSpinner.setAdapter(mScannedDevices);
-        // 获取默认蓝牙适配器
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (!checkPermissions(false)) {
+            System.out.println("缺少相关权限！前置鉴权失效！如果出现此提示，请检查是否有未鉴权调用startBluetoothScan()！");
+            return;
+        }
+        System.out.println(mBluetoothAdapter.getBondedDevices());
 
         // 注册 BroadcastReceiver，可以实时检测蓝牙开关
-        bluetoothStateReceiver = new BluetoothBroadcastReceiver(this);
+        bluetoothStateReceiver = new BroadcastEventReceiver(this);
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(bluetoothStateReceiver, filter);
 
         // 检查设备是否支持蓝牙
         if (mBluetoothAdapter == null) {
-            mbluetoothSupportText.setText("设备不支持蓝牙");
+            mBluetoothSupportText.setText("设备不支持蓝牙");
             Toast.makeText(this, "此设备不支持蓝牙", Toast.LENGTH_LONG).show();
             finish();
         } else {
-            if (mBluetoothAdapter.isEnabled()) {
-                onBluetoothStateOn();  // 蓝牙已启用
-            } else {
-                onBluetoothStateOff(); // 蓝牙已禁用
-            }
-            mbluetoothSupportText.setText("支持蓝牙");
+            detectBluetoothState(mBluetoothAdapter.isEnabled());
+            mBluetoothSupportText.setText("支持蓝牙");
             // 获取已配对的设备
             Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-
 
             // 检查已配对的设备数量
             if (pairedDevices.size() > 0) {
@@ -136,24 +130,10 @@ public class MainActivity extends Activity implements BluetoothStateListener {
         }
     }
 
-//    private final BroadcastReceiver mReceiver2 = new BroadcastReceiver() {
-//        public void onReceive(Context context, Intent intent) {
-//            String action = intent.getAction();
-//            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-//                // Discovery has found a device. Get the BluetoothDevice object and its info from the Intent.
-//                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-//                String deviceName = device.getName();
-//                String deviceAddress = device.getAddress(); // MAC address
-//                mArrayAdapter.add(deviceName + "\n" + deviceAddress);
-//            }
-//        }
-//    };
 
-
-    private void onRequestPermissions() {
+    private boolean checkPermissions(boolean claimPermission) {
         // 需要注意，用户选择为异步调用，所以该函数只起到第一次检验的作用。用户是否授权需要在 onRequestPermissionsResult 里面进行鉴别。
-        List<String> permissionsNeeded = new ArrayList<>();
-        // 需要但是未被授予的权限，这样可以将批量授权一次性做完
+        List<String> permissionsNeeded = new ArrayList<>(); // 需要但是未被授予的权限，这样可以将批量授权一次性做完
         String[] permissions = new String[]{
                 Manifest.permission.BLUETOOTH_ADMIN,
                 Manifest.permission.BLUETOOTH,
@@ -162,12 +142,10 @@ public class MainActivity extends Activity implements BluetoothStateListener {
         };
         // 所有需要的权限，会检查这些权限，没有授权的加入 permissionsNeeded 里面。
 
-        // 逐一检查，没有授权的批量添加至列表中，稍后统一授权
-        for (String permission : permissions) {
+        for (String permission : permissions) { // 逐一检查，没有授权的批量添加至列表中，稍后统一授权
             if (ContextCompat.checkSelfPermission(this, permission)
                     != PackageManager.PERMISSION_GRANTED) {
-                // 如果权限未被授予，添加到列表中
-                permissionsNeeded.add(permission);
+                permissionsNeeded.add(permission);// 如果权限未被授予，添加到列表中
             }
         }
 
@@ -184,17 +162,16 @@ public class MainActivity extends Activity implements BluetoothStateListener {
         System.out.println("Build Version:" + Build.VERSION.SDK_INT);
         System.out.println("Permission Needed:" + permissionsNeeded);
 
-        if (!permissionsNeeded.isEmpty()) {
+        if (!permissionsNeeded.isEmpty() && claimPermission) {
             ActivityCompat.requestPermissions(this,
                     permissionsNeeded.toArray(new String[0]),
                     PERMISSION_REQUEST_CODE);
             // 如果出现未授权的选项，将逐一授权
-        } else {
+        } else if (permissionsNeeded.isEmpty()) {
             System.out.println("All Permissions Granted.");
-            // 所有权限都已被授予，执行相关操作
-            blueToothScan();
+            return true;
         }
-
+        return false;
     }
 
     @Override
@@ -204,14 +181,12 @@ public class MainActivity extends Activity implements BluetoothStateListener {
             case PERMISSION_REQUEST_CODE: {
                 // 如果权限请求被取消，那么数组为空
                 if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // 权限被用户授予，执行蓝牙扫描
-                    System.out.println("User Granted.");
-                    blueToothScan();
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {// 权限被用户授予，执行蓝牙扫描
+                    System.out.println("onRequestPermissionsResult: User Granted.");
+                    startBluetoothScan();
 
-                } else {
-                    System.out.println("User Rejected.");
-                    // 权限被用户拒绝，提示用户授予权限
+                } else {// 权限被用户拒绝，提示用户授予权限
+                    System.out.println("onRequestPermissionsResult: User Rejected.");
                     Toast.makeText(this, "需要位置权限来搜索蓝牙设备", Toast.LENGTH_SHORT).show();
                 }
                 return;
@@ -219,8 +194,6 @@ public class MainActivity extends Activity implements BluetoothStateListener {
             // 处理其他权限请求的情况
         }
     }
-
-
 }
 
 

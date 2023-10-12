@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
-    <!-- 先前的蓝牙权限需求-->
+    <!-- 先前的蓝牙权限需求 -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <!-- 安卓12新增的蓝牙权限-->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!-- 安卓12新增的蓝牙权限 -->
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-    <!-- 定位权限， 蓝牙搜索需要-->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" /> <!-- 定位权限， 蓝牙搜索需要 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
 
     <application
         android:allowBackup="true"
@@ -24,6 +20,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Echoer"
         tools:targetApi="31">
+        <activity
+            android:name=".ActivityChatUI"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
