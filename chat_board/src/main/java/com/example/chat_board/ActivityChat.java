@@ -1,10 +1,10 @@
-package com.example.echoer;
+package com.example.chat_board;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-public class ActivityChatUI extends AppCompatActivity {
+public class ActivityChat extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
