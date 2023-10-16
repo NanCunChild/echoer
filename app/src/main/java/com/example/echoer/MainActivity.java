@@ -72,23 +72,6 @@ public class MainActivity extends Activity implements UIFlasher {
         unregisterReceiver(bluetoothStateReceiver); // 注销 BroadcastReceiver
     }
 
-//    private void checkInitialBluetoothState() {
-//        TextView mbluetoothStatusText = (TextView) findViewById(R.id.bluetoothStatus);
-//        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-//        if (bluetoothAdapter != null) {
-//            // 设备支持蓝牙
-//            if (bluetoothAdapter.isEnabled()) {
-//                onBluetoothStateOn();  // 蓝牙已启用
-//            } else {
-//                onBluetoothStateOff(); // 蓝牙已禁用
-//            }
-//        } else {
-//            // 设备不支持蓝牙
-//            mbluetoothStatusText.setText("设备不支持蓝牙");
-//        }
-//    }
-
-
     private void startBluetoothScan() {
         mScannedDevicesSpinner.setAdapter(mArrayAdapter);// 设置适配器到下拉列表
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();// 获取默认蓝牙适配器

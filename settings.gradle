@@ -14,4 +14,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Echoer"
 include ':app'
-include ':sendandreceive'
+include ':chat_board'
