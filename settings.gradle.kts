@@ -12,6 +12,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Echoer"
-include ':app'
-include ':chat_board'
+
+rootProject.name = "echoer"
+include(":app")
+include(":chat_board")

@@ -6,35 +6,61 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-     <LinearLayout
-         android:layout_width="match_parent"
-         android:layout_height="83dp"
-         android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="83dp"
+        android:orientation="vertical">
 
-          <TextView
-              android:id="@+id/bluetoothSupport"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="bluetoothSupport"
-              android:layout_marginTop="12dp"
-              android:layout_marginLeft="12dp"
-              />
+        <TextView
+            android:id="@+id/bluetoothStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:layout_marginTop="12dp"
+            android:layout_marginLeft="12dp"
+            />
 
-          <TextView
-              android:id="@+id/bluetoothStatus"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="Status"
-              android:layout_marginTop="12dp"
-              android:layout_marginLeft="12dp"
-              />
-     </LinearLayout>
+        <TextView
+            android:id="@+id/wifiStatus"
+            android:layout_width="86dp"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:layout_marginTop="12dp"
+            android:layout_marginLeft="12dp"/>
+    </LinearLayout>
 
-     <Spinner
-         android:id="@+id/devicesSpinner"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:layout_marginTop="12dp"
-         android:spinnerMode="dropdown" />
+    <Spinner
+        android:id="@+id/devicesSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:spinnerMode="dropdown" />
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="364dp"
+        android:layout_marginTop="12dp">
+
+        <!-- 在 ScrollView 中添加要滚动的内容 -->
+        <LinearLayout
+            android:id="@+id/deviceListLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 添加视图元素 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="这是可滚动的文本" />
+
+
+            <!-- 添加更多视图元素 -->
+            <!-- ... -->
+
+        </LinearLayout>
+    </ScrollView>
+
 
 </LinearLayout>
