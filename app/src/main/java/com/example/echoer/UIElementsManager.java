@@ -13,35 +13,30 @@ public class UIElementsManager {
     private static TextView wifiState;
     private static LinearLayout devicesDetectedList;
     private static WeakReference<View> mRootViewRef;
-    private UIElementsManager(){}
-    public static void initialize(View rootView){
-        if (rootView!=null) mRootViewRef = new WeakReference<>(rootView);;
+
+    private UIElementsManager() {
+    }
+
+    public static void initialize(View rootView) {
+        if (rootView != null) mRootViewRef = new WeakReference<>(rootView);
+        ;
         bluetoothState = rootView.findViewById(R.id.bluetoothStatus);
         wifiState = rootView.findViewById(R.id.wifiStatus);
         devicesDetectedList = rootView.findViewById(R.id.deviceListLayout);
     }
 
-//    Set & Get 经典方法，但是在这里没什么用，先留着，说不定之后要用
-//    public void setBluetoothState(TextView bluetoothState) {
-//        this.bluetoothState = bluetoothState;
-//    }
-//
-//    public void setWifiState(TextView wifiState) {
-//        this.wifiState = wifiState;
-//    }
-
-//    public TextView getWifiState() {
-//        return wifiState;
-//    }
-//
-//    public TextView getBluetoothState() {
-//        return bluetoothState;
-//    }
-
-    public static void setBluetoothStateText(String text){
+    public static void setBluetoothStateText(String text) {
         bluetoothState.setText(text);
     }
-    public static void setWifiStateText(String text){
+
+    public static void setWifiStateText(String text) {
         wifiState.setText(text);
+    }
+
+    public static void clearDeviceList() {
+        devicesDetectedList.removeAllViews();
+    }
+    public static void addViewToDeviceList(TextView textView){
+        devicesDetectedList.addView(textView);
     }
 }

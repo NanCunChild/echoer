@@ -29,12 +29,12 @@
             android:layout_marginLeft="12dp"/>
     </LinearLayout>
 
-    <Spinner
-        android:id="@+id/devicesSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:spinnerMode="dropdown" />
+<!--    <Spinner-->
+<!--        android:id="@+id/devicesSpinner"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="12dp"-->
+<!--        android:spinnerMode="dropdown" />-->
 
     <ScrollView
         android:id="@+id/scrollView"
@@ -53,7 +53,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="这是可滚动的文本" />
+                android:text="搜索到的蓝牙设备将放置在这里" />
 
 
             <!-- 添加更多视图元素 -->

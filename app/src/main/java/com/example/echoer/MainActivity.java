@@ -28,11 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private BluetoothDeviceScanner bluetoothDeviceScanner;
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothLeScanner bluetoothScanner;
-    private ScanCallback scanCallback;
     private List<BluetoothDevice> scannedDevices = new ArrayList<>();
-    private LinearLayout deviceListLayout;
     private PermissionManager permissionManager;
     private ScanSettings scanSettings = new ScanSettings.Builder()
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY) // 扫描模式
@@ -45,8 +44,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         UIElementsManager.initialize(findViewById(android.R.id.content));
-        System.out.println("Ready to require permissions...");
-        Log.d("debug","Ready to require permissions...");
+        Log.d("Permissions", "Ready to require permissions...");
 
         // 初始化PermissionManager
         String[] permissions = {
@@ -70,27 +68,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         permissionManager.requestPermissions();
+        Log.d("Permissions", "Permission request finished.");
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         bluetoothScanner = bluetoothAdapter.getBluetoothLeScanner();
-        if (!bluetoothAdapter.isEnabled()) {
-            bluetoothAdapter.enable();
+        bluetoothDeviceScanner = new BluetoothDeviceScanner(this);
 
-            // 初始化 ScanCallback
-            initScanCallback();
-
-            // 获取 LinearLayout 容器
-            deviceListLayout = findViewById(R.id.deviceListLayout);
-
-            // 开始蓝牙设备扫描
-            startScanning();
-
-        }
+        // 以下的代码极为丑陋，要不是因为蓝牙广播是非Sticky，我就不用这样了。
+        // TODO : 将initial蓝牙检测放进广播类中变成一个方法。
+        if(bluetoothAdapter.getState()==BluetoothAdapter.STATE_ON) UIElementsManager.setBluetoothStateText("蓝牙已开启");
+        else UIElementsManager.setBluetoothStateText("蓝牙已关闭");
     }
 
     private void renderDeviceList() {
         // 清空原有的设备列表
-        deviceListLayout.removeAllViews();
+        UIElementsManager.clearDeviceList();
 
         // 根据扫描到的设备列表创建 TextView 并添加到 LinearLayout
         for (BluetoothDevice device : scannedDevices) {
@@ -100,8 +92,7 @@ public class MainActivity extends AppCompatActivity {
                     LinearLayout.LayoutParams.WRAP_CONTENT
             ));
             textView.setText("Device Name: " + device.getName() + "\nDevice Address: " + device.getAddress());
-
-            deviceListLayout.addView(textView);
+            UIElementsManager.addViewToDeviceList(textView);
         }
     }
 
@@ -112,43 +103,6 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter wifiFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
         registerReceiver(NetworkBroadcastReceiver.getBluetoothStateReceiver(), bluetoothFilter);
         registerReceiver(NetworkBroadcastReceiver.getWifiStateReceiver(), wifiFilter);
+        permissionManager.requestPermissions();
     }
-
-
-    private void startScanning() {
-        if (bluetoothScanner != null) {
-            bluetoothScanner.startScan(scanCallback);
-
-            // 扫描一段时间后停止扫描
-            Handler handler = new Handler();
-            handler.postDelayed(this::stopScanning, 5000); // 扫描5秒后停止
-        }
-    }
-
-    private void stopScanning() {
-        if (bluetoothScanner != null) {
-            bluetoothScanner.stopScan(scanCallback);
-        }
-    }
-
-    private void initScanCallback() {
-        scanCallback = new ScanCallback() {
-            @Override
-            public void onScanResult(int callbackType, ScanResult result) {
-                super.onScanResult(callbackType, result);
-
-                // 获取扫描到的蓝牙设备
-                BluetoothDevice device = result.getDevice();
-
-                // 检查设备是否已经在列表中
-                if (!scannedDevices.contains(device)) {
-                    scannedDevices.add(device);
-
-                    // 在 UI 线程更新设备列表
-                    runOnUiThread(() -> renderDeviceList());
-                }
-            }
-        };
-    }
-
 }

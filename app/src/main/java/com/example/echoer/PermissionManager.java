@@ -70,6 +70,7 @@ public class PermissionManager {
 
     public void requestPermissions() {
         if (!arePermissionsGranted()) {
+//            if (mActivity.shouldShowRequestPermissionRationale())
             requestPermissionLauncher.launch(mPermissions);
         } else if (mCallback != null) {
             mCallback.onPermissionsGranted();
