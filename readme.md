@@ -1,12 +1,10 @@
-<img src="https://github.com/NanCunChild/IMGS/blob/main/echoer/Promotion_1.png?raw=true"  style="width:128px; height:128px; border-radius:24px"/>
+<h1 align="center">
+    <img src="https://github.com/NanCunChild/IMGS/blob/main/echoer/Promotion_1.png?raw=true"  style="width:128px; height:128px; border-radius:24px;"/>
+    <br>Echoer<br>
+</h1>
 
-# ==Echoer 项目介绍==
 
->该项目是去中心化 Echoer 项目的App部分，需要和对应的硬件搭配使用。
----
->硬件模块使用的 *ESP32-WROOM-32* 主控，连接的无线模块为 *nRF24L01 2.4GHz* 天线为 *TXWF-JKS-20* 胶棒天线。
----
->软件上使用Java开发，API最低版本为33。目前版本采用的 **非Root** 形式，直接在应用层上搭建临时协议栈。 
+# Echoer 项目介绍
 
 # 目录
 - [==Echoer 项目介绍==](#echoer-项目介绍)
@@ -60,3 +58,12 @@ Echoer项目旨在开发一种创新的**无中心通信系统**，使手机之�
 
 6. 数据存储去中心化：
 >用户的个人信息和通信内容分散存储在多个节点上，**避免单点故障和数据泄露**的风险。
+
+
+## 注意
+
+>该项目是去中心化 Echoer 项目的App部分，需要和对应的硬件搭配使用。
+
+>硬件模块使用的 *ESP32-WROOM-32* 主控，连接的无线模块为 *nRF24L01 2.4GHz* 天线为 *TXWF-JKS-20* 胶棒天线。
+
+>软件上使用Java开发，API最低版本为33。目前版本采用的 **非Root** 形式，直接在应用层上搭建临时协议栈。 
