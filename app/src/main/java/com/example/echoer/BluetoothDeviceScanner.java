@@ -9,17 +9,16 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Handler;
-import android.provider.Settings;
 import android.util.Log;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
+
+import com.example.echoer.managers.PermissionManager;
+import com.example.echoer.managers.UIElementsManager;
 
 import java.util.ArrayList;
 import java.util.List;

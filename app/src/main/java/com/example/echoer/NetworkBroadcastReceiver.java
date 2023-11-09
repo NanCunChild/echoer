@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 
+import com.example.echoer.managers.UIElementsManager;
+
 public class NetworkBroadcastReceiver {
     private final static android.content.BroadcastReceiver bluetoothStateReceiver = new android.content.BroadcastReceiver() {
         @Override
