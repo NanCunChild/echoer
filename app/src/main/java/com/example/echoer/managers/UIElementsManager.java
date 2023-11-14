@@ -21,7 +21,6 @@ public class UIElementsManager {
 
     public static void initialize(View rootView) {
         if (rootView != null) mRootViewRef = new WeakReference<>(rootView);
-        ;
         bluetoothState = rootView.findViewById(R.id.bluetoothStatus);
         wifiState = rootView.findViewById(R.id.wifiStatus);
         devicesDetectedList = rootView.findViewById(R.id.deviceListLayout);

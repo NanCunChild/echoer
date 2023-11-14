@@ -66,6 +66,13 @@ public class NetworkBroadcastReceiver {
         return bluetoothStateReceiver;
     }
 
+    public static void getBluetoothStateReceiverInitial() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter.getState() == BluetoothAdapter.STATE_ON)
+            UIElementsManager.setBluetoothStateText("蓝牙已开启");
+        else UIElementsManager.setBluetoothStateText("蓝牙已关闭");
+    }
+
     public static android.content.BroadcastReceiver getWifiStateReceiver() {
         return wifiStateReceiver;
     }

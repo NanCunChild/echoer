@@ -15,12 +15,14 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.echoer.managers.PermissionManager;
 import com.example.echoer.managers.UIElementsManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BluetoothDeviceScanner {
@@ -42,30 +44,17 @@ public class BluetoothDeviceScanner {
                 Manifest.permission.BLUETOOTH,
                 Manifest.permission.ACCESS_FINE_LOCATION,
         };
-        permissionManager = new PermissionManager(activity, permissionNeeded);
-        permissionManager.setPermissionCallback(new PermissionManager.PermissionCallback() {
+        permissionManager = new PermissionManager((AppCompatActivity) activity, permissionNeeded);
+        this.permissionManager.setPermissionAuthResultActor(new PermissionManager.PermissionAuthResultActor() {
+            // 这里是用户对于授权请求框的行为
             @Override
             public void onPermissionsGranted() {
-                // 当所有权限都被授予时，这里的代码会被执行
-                Log.d("Permissions", "All related bluetooth permissions granted.");
+                Log.d("Permissions","All Permission Granted.");
             }
 
             @Override
-            public void onPermissionsDenied(List<String> deniedPermissions) {
-                // 当至少有一个权限被拒绝时，这里的代码会被执行
-                new AlertDialog.Builder(activity)
-                        .setTitle("权限被拒绝")
-                        .setMessage("为了保证应用的正常运行，我们需要蓝牙相关权限。请前往设置授权。授权后请重启应用。")
-                        .setPositiveButton("去设置", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // 当用户点击"去设置"，跳转到应用详情页，以便手动授权
-                                permissionManager.guideUserToSettings();
-                            }
-                        })
-                        .setNegativeButton("取消", null)
-                        .show();
-
+            public void onPermissionsDenied(String[] permissionDenied) {
+                Log.w("Permissions","Permission Denied:"+ Arrays.toString(permissionDenied));
             }
         });
         permissionManager.requestPermissions();
