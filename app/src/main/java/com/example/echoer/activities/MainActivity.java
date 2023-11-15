@@ -2,7 +2,6 @@ package com.example.echoer.activities;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -13,21 +12,16 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.echoer.BluetoothDeviceScanner;
 import com.example.echoer.NetworkBroadcastReceiver;
 import com.example.echoer.managers.PermissionManager;
 import com.example.echoer.R;
@@ -38,7 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private BluetoothAdapter bluetoothAdapter;
     private final List<BluetoothDevice> scannedDevices = new ArrayList<>();
     private PermissionManager permissionManager;
     ScanCallback scanCallback = new ScanCallback() {
@@ -46,13 +39,31 @@ public class MainActivity extends AppCompatActivity {
         public void onScanResult(int callbackType, ScanResult result) {
             // 处理单个扫描结果
             Log.d("BluetoothScan", "Single Scan:" + result);
+            Log.d("BluetoothScan","getDevice: "+result.getDevice());
         }
 
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             // 处理一批扫描结果
+            List<String> deviceInfoList = new ArrayList<>();
+
+            for (ScanResult result : results) {
+                BluetoothDevice device = result.getDevice();
+                String deviceName = device.getName() != null ? device.getName() : "Unknown Device";
+                String deviceAddress = device.getAddress();
+                String deviceInfo = deviceName + " - " + deviceAddress;
+                deviceInfoList.add(deviceInfo);
+                Log.d("BluetoothScan", "Scan Result: " + result);
+                Log.d("BluetoothScan", "Device Name:" + deviceName + "; Device Address:" + deviceAddress);
+            }
+
             Log.d("BluetoothScan", "Batch Scan:" + results);
+
+            // 创建ArrayAdapter并传递给UIElementsManager
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, deviceInfoList);
+            UIElementsManager.refreshDeviceList(adapter);
         }
+
 
         @Override
         public void onScanFailed(int errorCode) {

@@ -36,31 +36,11 @@
 <!--        android:layout_marginTop="12dp"-->
 <!--        android:spinnerMode="dropdown" />-->
 
-    <ScrollView
-        android:id="@+id/scrollView"
+    <ListView
+        android:id="@+id/deviceListLayout"
         android:layout_width="match_parent"
-        android:layout_height="364dp"
-        android:layout_marginTop="12dp">
-
-        <!-- 在 ScrollView 中添加要滚动的内容 -->
-        <LinearLayout
-            android:id="@+id/deviceListLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- 添加视图元素 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="搜索到的蓝牙设备将放置在这里" />
-
-
-            <!-- 添加更多视图元素 -->
-            <!-- ... -->
-
-        </LinearLayout>
-    </ScrollView>
+        android:layout_height="382dp"
+        android:layout_marginTop="12dp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
