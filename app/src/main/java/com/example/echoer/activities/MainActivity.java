@@ -33,6 +33,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private final List<BluetoothDevice> scannedDevices = new ArrayList<>();
+    private boolean isScanning = false;
     private PermissionManager permissionManager;
     ScanCallback scanCallback = new ScanCallback() {
         @Override
@@ -122,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         startScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bluetoothScan(true);
+                bluetoothScan(!isScanning);
             }
         });
     }
@@ -173,8 +174,12 @@ public class MainActivity extends AppCompatActivity {
         List<ScanFilter> filters = new ArrayList<>();
         if (sig) {
             scanner.startScan(null,settings,scanCallback);
+            UIElementsManager.setScanButtonText("停止扫描");
+            this.isScanning = true;
         } else {
             scanner.stopScan(scanCallback);
+            UIElementsManager.setScanButtonText("开始扫描");
+            this.isScanning = false;
         }
 
     }

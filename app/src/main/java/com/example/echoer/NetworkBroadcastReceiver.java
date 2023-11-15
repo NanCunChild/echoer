@@ -16,18 +16,22 @@ public class NetworkBroadcastReceiver {
                 if (bluetoothState == BluetoothAdapter.STATE_ON) {
                     System.out.println("蓝牙已开启");
                     UIElementsManager.setBluetoothStateText("蓝牙已开启");
+                    UIElementsManager.setButtonStatus(true);
                 } else if (bluetoothState == BluetoothAdapter.STATE_OFF) {
                     System.out.println("蓝牙已关闭");
                     UIElementsManager.setBluetoothStateText("蓝牙已关闭");
+                    UIElementsManager.setButtonStatus(false);
                 } else if (bluetoothState == BluetoothAdapter.STATE_CONNECTED) {
                     System.out.println("蓝牙已连接至其它设备");
                     UIElementsManager.setBluetoothStateText("蓝牙已连接至其它设备");
                 } else if (bluetoothState == BluetoothAdapter.STATE_TURNING_OFF) {
                     System.out.println("蓝牙正在关闭");
                     UIElementsManager.setBluetoothStateText("蓝牙正在关闭...");
+                    UIElementsManager.setButtonStatus(false);
                 } else if (bluetoothState == BluetoothAdapter.STATE_TURNING_ON) {
                     System.out.println("蓝牙正在开启");
                     UIElementsManager.setBluetoothStateText("蓝牙正在开启...");
+                    UIElementsManager.setButtonStatus(false);
                 } else if (bluetoothState == BluetoothAdapter.STATE_CONNECTING) {
                     System.out.println("蓝牙正在连接");
                 }
@@ -68,9 +72,14 @@ public class NetworkBroadcastReceiver {
 
     public static void getBluetoothStateReceiverInitial() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter.getState() == BluetoothAdapter.STATE_ON)
+        if (bluetoothAdapter.getState() == BluetoothAdapter.STATE_ON) {
             UIElementsManager.setBluetoothStateText("蓝牙已开启");
-        else UIElementsManager.setBluetoothStateText("蓝牙已关闭");
+            UIElementsManager.setButtonStatus(true);
+        }
+        else {
+            UIElementsManager.setBluetoothStateText("蓝牙已关闭");
+            UIElementsManager.setButtonStatus(false);
+        }
     }
 
     public static android.content.BroadcastReceiver getWifiStateReceiver() {
