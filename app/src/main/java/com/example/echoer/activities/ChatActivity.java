@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.echoer.databinding.ActivityChatBinding;
@@ -27,6 +28,11 @@ public class ChatActivity extends AppCompatActivity {
         setListeners();
         initMessageList();
         init();
+
+        Intent intent = getIntent();
+        String deviceName = intent.getStringExtra("DEVICE_NAME");
+        String deviceAddress = intent.getStringExtra("DEVICE_ADDRESS");
+        // 使用这些数据进行相关操作
     }
 
     private void init() {

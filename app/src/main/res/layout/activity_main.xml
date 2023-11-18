@@ -27,6 +27,11 @@
             android:text="TextView"
             android:layout_marginTop="12dp"
             android:layout_marginLeft="12dp"/>
+
+<!--        <md-fab label="Edit">-->
+<!--            <md-icon slot="icon">edit</md-icon>-->
+<!--        </md-fab>-->
+
     </LinearLayout>
 
 <!--    <Spinner-->
