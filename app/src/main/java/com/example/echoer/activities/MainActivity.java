@@ -23,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.echoer.NetworkBroadcastReceiver;
 import com.example.echoer.managers.PermissionManager;
@@ -68,7 +69,9 @@ public class MainActivity extends AppCompatActivity {
 
             // 创建ArrayAdapter并传递给UIElementsManager
             ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, deviceInfoList);
-            deviceListView.setAdapter(adapter);
+            Log.d("BluetoothScan", "扫到的个数: " + adapter.getCount());
+
+//            deviceListView.setAdapter(adapter);
             UIElementsManager.refreshDeviceList(adapter);
         }
 
@@ -139,7 +142,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ScanResult selectedResult = scanResultList.get(position); // deviceList是ScanResult列表
-                openChatActivity(selectedResult);
+//                openChatActivity(selectedResult);
+                Intent intent = new Intent(MainActivity.this, ChatActivity.class);
+
+                BluetoothDevice device = selectedResult.getDevice();
+                intent.putExtra("DEVICE_NAME", device.getName());
+                intent.putExtra("DEVICE_ADDRESS", device.getAddress());
+                // 根据需要添加更多参数
+
+                Toast.makeText(MainActivity.this, "已选中" + device.getAddress(), Toast.LENGTH_SHORT).show();
+                startActivity(intent);
             }
         });
 
@@ -147,13 +159,14 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void openChatActivity(ScanResult selectedResult) {
-        Intent intent = new Intent(this, ChatActivity.class); // 替换ChatActivity为你的聊天页面Activity
+        Intent intent = new Intent(this, ChatActivity.class);
 
         BluetoothDevice device = selectedResult.getDevice();
         intent.putExtra("DEVICE_NAME", device.getName());
         intent.putExtra("DEVICE_ADDRESS", device.getAddress());
-        // 你可以根据需要添加更多参数
+        // 根据需要添加更多参数
 
+        Toast.makeText(MainActivity.this, "已选中" + device.getAddress(), Toast.LENGTH_SHORT).show();
         startActivity(intent);
     }
 
@@ -166,11 +179,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        IntentFilter bluetoothFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        IntentFilter wifiFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        registerReceiver(NetworkBroadcastReceiver.getBluetoothStateReceiver(), bluetoothFilter);
-        registerReceiver(NetworkBroadcastReceiver.getWifiStateReceiver(), wifiFilter);
-        permissionManager.requestPermissions();
+//        IntentFilter bluetoothFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+//        IntentFilter wifiFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
+//        registerReceiver(NetworkBroadcastReceiver.getBluetoothStateReceiver(), bluetoothFilter);
+//        registerReceiver(NetworkBroadcastReceiver.getWifiStateReceiver(), wifiFilter);
+//        permissionManager.requestPermissions();
     }
 
     @SuppressLint("MissingPermission")

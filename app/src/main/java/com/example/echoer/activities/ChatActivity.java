@@ -52,22 +52,28 @@ public class ChatActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
 
-        setListeners();
         init();
+        setListeners();
 
         Intent intent = getIntent();
         String deviceName = intent.getStringExtra("DEVICE_NAME");
         String deviceAddress = intent.getStringExtra("DEVICE_ADDRESS");
         // 使用这些数据进行相关操作
 
-        // 初始化蓝牙适配器
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (deviceName == null && deviceAddress == null) {
+            Toast.makeText(this, "您还没有连接任何蓝牙设备", Toast.LENGTH_SHORT).show();
+        } else {
+            binding.textName.setText(deviceAddress);
 
-        // 获取蓝牙设备对象
-        bluetoothDevice = bluetoothAdapter.getRemoteDevice(deviceAddress);
+            // 初始化蓝牙适配器
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        // 建立蓝牙连接
-        connectDevice();
+            // 获取蓝牙设备对象
+            bluetoothDevice = bluetoothAdapter.getRemoteDevice(deviceAddress);
+
+            // 建立蓝牙连接
+            connectDevice();
+        }
     }
 
     private void init() {
