@@ -27,7 +27,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Log.d("tag", "why!!!!!!");
         if (viewType == Constants.VIEW_TYPE_SENT) {   // 处理由“我”发出来的信息
-            return new SentMassageViewHolder(
+            return new SentMessageViewHolder(
                     ItemContainerSentMessageBinding.inflate(
                             LayoutInflater.from(parent.getContext()),
                             parent,
@@ -35,7 +35,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     )
             );
         } else {    // 处理由对方发出来的信息
-            return new ReceivedMassageViewHolder(
+            return new ReceivedMessageViewHolder(
                     ItemContainerReceivedMessageBinding.inflate(
                             LayoutInflater.from(parent.getContext()),
                             parent,
@@ -49,9 +49,9 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (getItemViewType(position) == Constants.VIEW_TYPE_SENT) {
             Log.d("adapter", (chatMessageList.get(position)).getMessage());
-            ((SentMassageViewHolder) holder).setData((chatMessageList.get(position)));
+            ((SentMessageViewHolder) holder).setData((chatMessageList.get(position)));
         } else {
-            ((ReceivedMassageViewHolder) holder).setData(chatMessageList.get(position));
+            ((ReceivedMessageViewHolder) holder).setData(chatMessageList.get(position));
         }
     }
 
@@ -66,11 +66,11 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     // 装载发送消息的视图
-    static class SentMassageViewHolder extends RecyclerView.ViewHolder {
+    static class SentMessageViewHolder extends RecyclerView.ViewHolder {
 
         private final ItemContainerSentMessageBinding binding;
 
-        SentMassageViewHolder(ItemContainerSentMessageBinding itemContainerSentMessageBinding) {
+        SentMessageViewHolder(ItemContainerSentMessageBinding itemContainerSentMessageBinding) {
             super(itemContainerSentMessageBinding.getRoot());
             binding = itemContainerSentMessageBinding;
         }
@@ -82,11 +82,11 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     // 装载收到消息的视图
-    static class ReceivedMassageViewHolder extends RecyclerView.ViewHolder {
+    static class ReceivedMessageViewHolder extends RecyclerView.ViewHolder {
 
         private final ItemContainerReceivedMessageBinding binding;
 
-        ReceivedMassageViewHolder(ItemContainerReceivedMessageBinding itemContainerReceivedMessageBinding) {
+        ReceivedMessageViewHolder(ItemContainerReceivedMessageBinding itemContainerReceivedMessageBinding) {
             super(itemContainerReceivedMessageBinding.getRoot());
             binding = itemContainerReceivedMessageBinding;
         }

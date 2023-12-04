@@ -30,6 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
 public class ChatActivity extends AppCompatActivity {
     private ActivityChatBinding binding;
     private List<ChatMessage> chatMessages;
@@ -84,6 +87,11 @@ public class ChatActivity extends AppCompatActivity {
 
         // 初始化 mHandler
         mHandler = new Handler(Looper.getMainLooper());
+
+        // 初始化chatMessages, chatAdapter
+        chatMessages = new ArrayList<>();
+        chatAdapter = new ChatMessageAdapter(chatMessages);
+        binding.chatRecycleView.setAdapter(chatAdapter);
     }
 
     private void setListeners() {
@@ -93,12 +101,30 @@ public class ChatActivity extends AppCompatActivity {
             String message = binding.inputText.getText().toString(); // 获取消息文本框内容
             // 将消息添加到消息列表里
             if (!message.equals("")) {
-                chatAdapter.notifyDataSetChanged(); // 通知适配器数据发生了变化
-                sendMessage(message); // 发送蓝牙消息
+                // 添加您的消息到聊天界面
+                String sendTime = getSendTime();
+                chatMessages.add(new ChatMessage(sendTime, message, "Me", Constants.VIEW_TYPE_SENT));
+                chatAdapter.notifyItemInserted(chatMessages.size() - 1);
+                binding.chatRecycleView.smoothScrollToPosition(chatMessages.size() - 1);
                 binding.inputText.setText(""); // 清空输入框
+
+//                sendMessage(message); // 发送蓝牙消息
             }
             Toast.makeText(this, "消息已发送", Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private static String getSendTime() {
+        // 获取当前日期和时间
+        Date currentDate = new Date();
+
+        // 创建日期格式化对象，指定日期和时间的格式
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        // 使用格式化对象将日期和时间格式化为字符串
+        String formattedDate = dateFormat.format(currentDate);
+
+        return formattedDate;
     }
 
     // 发送蓝牙消息

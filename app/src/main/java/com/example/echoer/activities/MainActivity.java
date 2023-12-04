@@ -142,16 +142,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ScanResult selectedResult = scanResultList.get(position); // deviceList是ScanResult列表
-//                openChatActivity(selectedResult);
-                Intent intent = new Intent(MainActivity.this, ChatActivity.class);
-
-                BluetoothDevice device = selectedResult.getDevice();
-                intent.putExtra("DEVICE_NAME", device.getName());
-                intent.putExtra("DEVICE_ADDRESS", device.getAddress());
-                // 根据需要添加更多参数
-
-                Toast.makeText(MainActivity.this, "已选中" + device.getAddress(), Toast.LENGTH_SHORT).show();
-                startActivity(intent);
+                openChatActivity(selectedResult);
             }
         });
 
