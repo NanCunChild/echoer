@@ -26,7 +26,6 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d("tag", "why!!!!!!");
         if (viewType == Constants.VIEW_TYPE_SENT) {   // 处理由“我”发出来的信息
             return new SentMessageViewHolder(
                     ItemContainerSentMessageBinding.inflate(

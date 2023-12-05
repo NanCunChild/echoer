@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.echoer.databinding.ActivityChatBinding;
@@ -28,6 +29,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import java.util.Date;
@@ -40,7 +42,8 @@ public class ChatActivity extends AppCompatActivity {
 
     // 声明蓝牙相关的成员变量
     private BluetoothAdapter bluetoothAdapter;
-    private BluetoothDevice bluetoothDevice;
+    //    private BluetoothDevice bluetoothDevice;
+    private BluetoothDevice esp32Device;
     private BluetoothSocket bluetoothSocket;
     private InputStream inputStream;
     private OutputStream outputStream;
@@ -66,16 +69,19 @@ public class ChatActivity extends AppCompatActivity {
         if (deviceName == null && deviceAddress == null) {
             Toast.makeText(this, "您还没有连接任何蓝牙设备", Toast.LENGTH_SHORT).show();
         } else {
-            binding.textName.setText(deviceAddress);
+            binding.textName.setText(deviceName);
+//            binding.textName.setText(deviceAddress);
 
             // 初始化蓝牙适配器
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
             // 获取蓝牙设备对象
-            bluetoothDevice = bluetoothAdapter.getRemoteDevice(deviceAddress);
-
+//            bluetoothDevice = bluetoothAdapter.getRemoteDevice(deviceAddress);d
             // 建立蓝牙连接
-            connectDevice();
+//            connectDevice();
+
+            // 搜索并连接到ESP32
+            connectToESP32(deviceName);
         }
     }
 
@@ -108,7 +114,7 @@ public class ChatActivity extends AppCompatActivity {
                 binding.chatRecycleView.smoothScrollToPosition(chatMessages.size() - 1);
                 binding.inputText.setText(""); // 清空输入框
 
-//                sendMessage(message); // 发送蓝牙消息
+                sendMessage(message); // 发送蓝牙消息
             }
             Toast.makeText(this, "消息已发送", Toast.LENGTH_SHORT).show();
         });
@@ -129,65 +135,145 @@ public class ChatActivity extends AppCompatActivity {
 
     // 发送蓝牙消息
     private void sendMessage(String message) {
-        byte[] buffer = message.getBytes();
+//        byte[] buffer = message.getBytes();
+//        try {
+//            if (outputStream != null) {
+//                try {
+//                    outputStream.write(buffer);
+//                    mHandler.obtainMessage(Constants.VIEW_TYPE_RECEIVED, -1, -1, buffer).sendToTarget();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            } else {
+//                // 输出流为空，蓝牙连接未建立
+//                Toast.makeText(this, "蓝牙连接未建立", Toast.LENGTH_SHORT).show();
+//            }
+//            outputStream.write(buffer);
+//            mHandler.obtainMessage(Constants.VIEW_TYPE_RECEIVED, -1, -1, buffer).sendToTarget();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         try {
-            if (outputStream != null) {
-                try {
-                    outputStream.write(buffer);
-                    mHandler.obtainMessage(Constants.VIEW_TYPE_RECEIVED, -1, -1, buffer).sendToTarget();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                // 输出流为空，蓝牙连接未建立
-                Toast.makeText(this, "蓝牙连接未建立", Toast.LENGTH_SHORT).show();
-            }
-            outputStream.write(buffer);
-            mHandler.obtainMessage(Constants.VIEW_TYPE_RECEIVED, -1, -1, buffer).sendToTarget();
+            outputStream.write(message.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // 建立蓝牙连接
-    private void connectDevice() {
-        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // 标准串口服务的UUID
+    // 接受蓝牙消息
+    private void receiveData() {
         try {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid);
-            bluetoothSocket.connect();
             inputStream = bluetoothSocket.getInputStream();
+            byte[] buffer = new byte[1024];
+            int bytes;
+
+            while (true) {
+                // 读取数据
+                bytes = inputStream.read(buffer);
+                String receivedMessage = new String(buffer, 0, bytes);
+
+                // 更新UI
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // 添加您的消息到聊天界面
+                        String sendTime = getSendTime();
+                        chatMessages.add(new ChatMessage(sendTime, receivedMessage, "Me", Constants.VIEW_TYPE_RECEIVED));
+                        chatAdapter.notifyItemInserted(chatMessages.size() - 1);
+                        binding.chatRecycleView.smoothScrollToPosition(chatMessages.size() - 1);
+                        binding.inputText.setText(""); // 清空输入框
+                    }
+                });
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void connectToESP32(String deviceName) {
+        // 搜索配对设备
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+        if (pairedDevices.size() > 0) {
+            for (BluetoothDevice device : pairedDevices) {
+                if (device.getName().equals(deviceName)) {
+                    esp32Device = device;
+                    break;
+                }
+            }
+        }
+
+        // 创建并连接socket
+        try {
+            bluetoothSocket = esp32Device.createRfcommSocketToServiceRecord(
+                    UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")); // 通用串行端口服务UUID
+            bluetoothSocket.connect();
+
+            // 获取输出流
             outputStream = bluetoothSocket.getOutputStream();
+
+            // 发送数据
+            sendMessage("Hello World");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        // 启动线程用于读取蓝牙消息
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte[] buffer = new byte[1024];
-                int bytes;
-
-                while (true) {
-                    try {
-                        bytes = inputStream.read(buffer);
-                        mHandler.obtainMessage(Constants.VIEW_TYPE_RECEIVED, bytes, -1, buffer).sendToTarget();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
+                receiveData();
             }
         }).start();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            bluetoothSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 与其他设备建立蓝牙连接
+//    private void connectDevice() {
+//        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // 标准串口服务的UUID
+//        try {
+//            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+//                // TODO: Consider calling
+//                //    ActivityCompat#requestPermissions
+//                // here to request the missing permissions, and then overriding
+//                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//                //                                          int[] grantResults)
+//                // to handle the case where the user grants the permission. See the documentation
+//                // for ActivityCompat#requestPermissions for more details.
+//                return;
+//            }
+//            bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid);
+//            bluetoothSocket.connect();
+//            inputStream = bluetoothSocket.getInputStream();
+//            outputStream = bluetoothSocket.getOutputStream();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        // 启动线程用于读取蓝牙消息
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                byte[] buffer = new byte[1024];
+//                int bytes;
+//
+//                while (true) {
+//                    try {
+//                        bytes = inputStream.read(buffer);
+//                        mHandler.obtainMessage(Constants.VIEW_TYPE_RECEIVED, bytes, -1, buffer).sendToTarget();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                        break;
+//                    }
+//                }
+//            }
+//        }).start();
+//    }
 }
