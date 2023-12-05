@@ -27,6 +27,7 @@ import com.example.echoer.utilities.Constants;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -135,26 +136,13 @@ public class ChatActivity extends AppCompatActivity {
 
     // 发送蓝牙消息
     private void sendMessage(String message) {
-//        byte[] buffer = message.getBytes();
-//        try {
-//            if (outputStream != null) {
-//                try {
-//                    outputStream.write(buffer);
-//                    mHandler.obtainMessage(Constants.VIEW_TYPE_RECEIVED, -1, -1, buffer).sendToTarget();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            } else {
-//                // 输出流为空，蓝牙连接未建立
-//                Toast.makeText(this, "蓝牙连接未建立", Toast.LENGTH_SHORT).show();
-//            }
-//            outputStream.write(buffer);
-//            mHandler.obtainMessage(Constants.VIEW_TYPE_RECEIVED, -1, -1, buffer).sendToTarget();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        message = message + '\n';
+        Log.d("message before", message);
         try {
-            outputStream.write(message.getBytes());
+            outputStream.write(message.getBytes(StandardCharsets.UTF_8));
+            byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
+            String messageContent = new String(messageBytes, StandardCharsets.UTF_8);
+            Log.d("message after", messageContent);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -166,24 +154,36 @@ public class ChatActivity extends AppCompatActivity {
             inputStream = bluetoothSocket.getInputStream();
             byte[] buffer = new byte[1024];
             int bytes;
+            StringBuilder receivedMessageBuilder = new StringBuilder();
 
             while (true) {
                 // 读取数据
                 bytes = inputStream.read(buffer);
-                String receivedMessage = new String(buffer, 0, bytes);
+                String receivedData = new String(buffer, 0, bytes, StandardCharsets.UTF_8);
+                Log.d("received", receivedMessageBuilder.toString().trim().toString().trim());
+                receivedMessageBuilder.append(receivedData);
 
-                // 更新UI
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // 添加您的消息到聊天界面
-                        String sendTime = getSendTime();
-                        chatMessages.add(new ChatMessage(sendTime, receivedMessage, "Me", Constants.VIEW_TYPE_RECEIVED));
-                        chatAdapter.notifyItemInserted(chatMessages.size() - 1);
-                        binding.chatRecycleView.smoothScrollToPosition(chatMessages.size() - 1);
-                        binding.inputText.setText(""); // 清空输入框
-                    }
-                });
+                // 检查是否接收到换行符
+                if (receivedData.contains("\n")) {
+                    // 提取完整消息
+                    String receivedMessage = receivedMessageBuilder.toString().trim();
+
+                    // 更新UI
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // 添加您的消息到聊天界面
+                            String sendTime = getSendTime();
+                            chatMessages.add(new ChatMessage(sendTime, receivedMessage, "Me", Constants.VIEW_TYPE_RECEIVED));
+                            chatAdapter.notifyItemInserted(chatMessages.size() - 1);
+                            binding.chatRecycleView.smoothScrollToPosition(chatMessages.size() - 1);
+                            binding.inputText.setText(""); // 清空输入框
+                        }
+                    });
+
+                    // 重置消息构建器
+                    receivedMessageBuilder = new StringBuilder();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
