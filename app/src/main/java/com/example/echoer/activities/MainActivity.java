@@ -7,11 +7,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanFilter;
-import android.bluetooth.le.ScanResult;
-import android.bluetooth.le.ScanSettings;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
@@ -25,9 +20,11 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.example.echoer.NetworkBroadcastReceiver;
+import com.example.echoer.adapters.BC_ScanAdapter;
 import com.example.echoer.managers.PermissionManager;
 import com.example.echoer.R;
 import com.example.echoer.managers.UIElementsManager;
+import com.example.echoer.utilities.BluetoothScanResultMaker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,49 +33,10 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private boolean isScanning = false;
     private PermissionManager permissionManager;
+    private BC_ScanAdapter bluetoothAdapter;
+    private List<String> scannedDeviceListUI = new ArrayList<>();
     private ListView deviceListView;
-    private List<ScanResult> scanResultList;
-
-    ScanCallback scanCallback = new ScanCallback() {
-        @Override
-        public void onScanResult(int callbackType, ScanResult result) {
-            // 处理单个扫描结果
-            Log.d("BluetoothScan", "Single Scan:" + result);
-            Log.d("BluetoothScan","getDevice: "+result.getDevice());
-        }
-
-        @Override
-        public void onBatchScanResults(List<ScanResult> results) {
-            // 处理一批扫描结果
-            List<String> deviceInfoList = new ArrayList<>();
-            scanResultList = new ArrayList<>();
-
-            for (ScanResult result : results) {
-                BluetoothDevice device = result.getDevice();
-                @SuppressLint("MissingPermission") String deviceName = device.getName() != null ? device.getName() : "Unknown Device";
-                String deviceAddress = device.getAddress();
-                String deviceInfo = deviceName + " - " + deviceAddress;
-                deviceInfoList.add(deviceInfo);
-                scanResultList.add(result);
-                Log.d("BluetoothScan", "Scan Result: " + result);
-                Log.d("BluetoothScan", "Device Name:" + deviceName + "; Device Address:" + deviceAddress);
-            }
-
-            Log.d("BluetoothScan", "Batch Scan:" + results);
-
-            // 创建ArrayAdapter并传递给UIElementsManager
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, deviceInfoList);
-            deviceListView.setAdapter(adapter);
-            UIElementsManager.refreshDeviceList(adapter);
-        }
-
-
-        @Override
-        public void onScanFailed(int errorCode) {
-            // 处理扫描失败的情况
-            Log.d("BluetoothScan", "Scan Failed:" + errorCode);
-        }
-    };
+    private List<BluetoothScanResultMaker> scannedDeviceList = new ArrayList<>();
 
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
@@ -87,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         UIElementsManager.initialize(findViewById(android.R.id.content));
+        scannedDeviceListUI = new ArrayList<>();
 
         ////////////////////////权限请求/////////////////////////
         // 初始化PermissionManager
@@ -116,21 +75,38 @@ public class MainActivity extends AppCompatActivity {
         permissionManager.requestPermissions();
         ////////////////////////权限请求/////////////////////////
 
-        NetworkBroadcastReceiver.getBluetoothStateReceiverInitial();
+        NetworkBroadcastReceiver.getBluetoothStateReceiverInitial(); // 有点丑陋，不过我认为是谷歌的锅
 
-        Button goToChat = findViewById(R.id.btn_goToChat);// 去往聊天界面
-        Button startScan = findViewById(R.id.btm_startScan); // 开始扫描
-        goToChat.setOnClickListener(new View.OnClickListener() {
+        this.bluetoothAdapter = new BC_ScanAdapter(this, new BC_ScanAdapter.ScanCallback() {
+            @SuppressLint("MissingPermission")
             @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ChatActivity.class);
-                startActivity(intent);
+            public void onDeviceFound(BluetoothDevice device) {
+                // 在这里处理找到的蓝牙设备
+                String deviceName = device.getName() == null ? "未知设备" : device.getName();
+                String deviceAddress = device.getAddress();
+                Log.d("Bluetooth", "Found device: " + deviceName + " - " + deviceAddress);
+                BluetoothScanResultMaker deviceItem = new BluetoothScanResultMaker(deviceName, deviceAddress);
+                scannedDeviceList.add(deviceItem);
+                scannedDeviceListUI.add(deviceName + "-" + deviceAddress);
+                ArrayAdapter<String> scannedDeviceArray = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, scannedDeviceListUI);
+                UIElementsManager.refreshDeviceList(scannedDeviceArray);
             }
         });
+
+        Button startScan = findViewById(R.id.btm_startScan); // 开始扫描按钮
         startScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bluetoothScan(!isScanning);
+                bluetoothAdapter.scanOptimizer(!isScanning);
+                isScanning = !isScanning;
+                if (isScanning) {
+                    Log.d("Bluetooth", scannedDeviceList.toString());
+                    UIElementsManager.setScanButtonText("停止扫描");
+                } else {
+                    scannedDeviceList = new ArrayList<>(); // 扫描结果清零，防止堆一堆没用的设备
+                    UIElementsManager.setScanButtonText("开始扫描");
+                }
+
             }
         });
 
@@ -138,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ScanResult selectedResult = scanResultList.get(position); // deviceList是ScanResult列表
+                BluetoothScanResultMaker selectedResult = scannedDeviceList.get(position);
                 openChatActivity(selectedResult);
             }
         });
@@ -146,13 +122,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("MissingPermission")
-    private void openChatActivity(ScanResult selectedResult) {
-        Intent intent = new Intent(this, ChatActivity.class); // 替换ChatActivity为你的聊天页面Activity
+    private void openChatActivity(BluetoothScanResultMaker selectedResult) {
+        Intent intent = new Intent(this, ChatActivity.class); // 替换ChatActivity为聊天页面Activity
 
-        BluetoothDevice device = selectedResult.getDevice();
-        intent.putExtra("DEVICE_NAME", device.getName());
-        intent.putExtra("DEVICE_ADDRESS", device.getAddress());
-        // 你可以根据需要添加更多参数
+        intent.putExtra("DEVICE_NAME", selectedResult.getDeviceName());
+        intent.putExtra("DEVICE_ADDRESS", selectedResult.getDeviceAddress());
+        // 根据需要添加更多参数
 
         startActivity(intent);
     }
@@ -160,7 +135,12 @@ public class MainActivity extends AppCompatActivity {
 
     protected void onPause() {
         super.onPause();
-        bluetoothScan(false);
+        bluetoothAdapter.scanOptimizer(false);
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        bluetoothAdapter.scanOptimizer(false);
     }
 
     @Override
@@ -171,46 +151,5 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(NetworkBroadcastReceiver.getBluetoothStateReceiver(), bluetoothFilter);
         registerReceiver(NetworkBroadcastReceiver.getWifiStateReceiver(), wifiFilter);
         permissionManager.requestPermissions();
-    }
-
-    @SuppressLint("MissingPermission")
-    private void bluetoothScan(boolean sig) {
-//        String[] preconditions = new String[]{
-//                Manifest.permission.BLUETOOTH,
-//                Manifest.permission.BLUETOOTH_SCAN,
-//        };
-//        PermissionManager tempPer = new PermissionManager(this, preconditions);
-//        tempPer.setPermissionAuthResultActor(new PermissionManager.PermissionAuthResultActor() {
-//            // 这里是用户对于授权请求框的行为
-//            @Override
-//            public void onPermissionsGranted() {
-//                Log.d("Permissions", "All Permission Granted.");
-//            }
-//
-//            @Override
-//            public void onPermissionsDenied(String[] permissionDenied) {
-//                Log.w("Permissions", "Permission Denied:" + Arrays.toString(permissionDenied));
-//            }
-//        });
-//        if (tempPer.hasPermissions().length != 0) {
-//            Toast.makeText(this, "没有权限", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-        BluetoothLeScanner scanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-        ScanSettings settings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .setReportDelay(1000)  // 设置为1秒（1000毫秒）
-                .build();
-        List<ScanFilter> filters = new ArrayList<>();
-        if (sig) {
-            scanner.startScan(null,settings,scanCallback);
-            UIElementsManager.setScanButtonText("停止扫描");
-            this.isScanning = true;
-        } else {
-            scanner.stopScan(scanCallback);
-            UIElementsManager.setScanButtonText("开始扫描");
-            this.isScanning = false;
-        }
-
     }
 }
