@@ -11,9 +11,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -50,6 +47,7 @@ public class ChatActivity extends AppCompatActivity {
     private OutputStream outputStream;
 
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -133,12 +131,8 @@ public class ChatActivity extends AppCompatActivity {
     // 发送蓝牙消息
     private void sendMessage(String message) {
         message = message + '\n';
-        Log.d("message before", message);
         try {
             outputStream.write(message.getBytes(StandardCharsets.UTF_8));
-            byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
-            String messageContent = new String(messageBytes, StandardCharsets.UTF_8);
-            Log.d("message after", messageContent);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -152,11 +146,10 @@ public class ChatActivity extends AppCompatActivity {
             int bytes;
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-            while (true) {
+            while (bluetoothAdapter!=null) {
                 // 读取数据
                 bytes = inputStream.read(buffer);
                 byteArrayOutputStream.write(buffer, 0, bytes);
-//                Log.d("received", receivedMessageBuilder.toString().trim().toString().trim());
 
                 // 检查是否接收到换行符
                 if (new String(buffer, 0, bytes, StandardCharsets.UTF_8).contains("\n")) {
@@ -164,18 +157,14 @@ public class ChatActivity extends AppCompatActivity {
                     String receivedMessage = byteArrayOutputStream.toString("UTF-8").trim();
 
                     // 更新UI
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // 添加您的消息到聊天界面
-                            String sendTime = getSendTime();
-                            chatMessages.add(new ChatMessage(sendTime, receivedMessage, "Me", Constants.VIEW_TYPE_RECEIVED));
-                            chatAdapter.notifyItemInserted(chatMessages.size() - 1);
-                            binding.chatRecycleView.smoothScrollToPosition(chatMessages.size() - 1);
+                    runOnUiThread(() -> {
+                        // 添加您的消息到聊天界面
+                        String sendTime = getSendTime();
+                        chatMessages.add(new ChatMessage(sendTime, receivedMessage, "Me", Constants.VIEW_TYPE_RECEIVED));
+                        chatAdapter.notifyItemInserted(chatMessages.size() - 1);
+                        binding.chatRecycleView.smoothScrollToPosition(chatMessages.size() - 1);
 //                            binding.inputText.setText(""); // 清空输入框
-                        }
                     });
-
                     // 重置byte流
                     byteArrayOutputStream = new ByteArrayOutputStream();
                 }
@@ -213,12 +202,7 @@ public class ChatActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                receiveData();
-            }
-        }).start();
+        new Thread(this::receiveData).start();
     }
 
     @Override

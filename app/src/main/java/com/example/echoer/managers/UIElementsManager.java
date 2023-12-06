@@ -3,7 +3,6 @@ package com.example.echoer.managers;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -39,9 +38,9 @@ public class UIElementsManager {
         wifiState.setText(text);
     }
 
-    public static void clearDeviceList() {
-        devicesDetectedList.removeAllViews();
-    }
+//    public static void clearDeviceList() {
+//        devicesDetectedList.removeAllViews();
+//    }
 
     public static void refreshDeviceList(ArrayAdapter<String> arrayAdapter) {
         devicesDetectedList.setAdapter(arrayAdapter);

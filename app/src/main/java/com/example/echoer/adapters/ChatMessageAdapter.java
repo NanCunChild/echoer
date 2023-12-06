@@ -1,6 +1,5 @@
 package com.example.echoer.adapters;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
