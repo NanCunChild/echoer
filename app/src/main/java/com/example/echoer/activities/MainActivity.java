@@ -97,8 +97,13 @@ public class MainActivity extends AppCompatActivity {
         startScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bluetoothAdapter.scanOptimizer(!isScanning);
-                isScanning = !isScanning;
+                try {
+                    bluetoothAdapter.scanOptimizer(!isScanning);
+                    isScanning = !isScanning;
+                }catch (IllegalArgumentException e){
+                    e.printStackTrace();
+                }
+
                 if (isScanning) {
                     Log.d("Bluetooth", scannedDeviceList.toString());
                     UIElementsManager.setScanButtonText("停止扫描");
@@ -114,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
         deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                bluetoothAdapter.scanOptimizer(false);
                 BluetoothScanResultMaker selectedResult = scannedDeviceList.get(position);
                 openChatActivity(selectedResult);
             }
@@ -123,8 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void openChatActivity(BluetoothScanResultMaker selectedResult) {
-        Intent intent = new Intent(this, ChatActivity.class); // 替换ChatActivity为聊天页面Activity
-
+        Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra("DEVICE_NAME", selectedResult.getDeviceName());
         intent.putExtra("DEVICE_ADDRESS", selectedResult.getDeviceAddress());
         // 根据需要添加更多参数
@@ -135,12 +140,21 @@ public class MainActivity extends AppCompatActivity {
 
     protected void onPause() {
         super.onPause();
-        bluetoothAdapter.scanOptimizer(false);
+        try {
+            bluetoothAdapter.scanOptimizer(false);
+        }catch (IllegalArgumentException e){
+            e.printStackTrace();
+        }
+
     }
 
     protected void onDestroy() {
         super.onDestroy();
-        bluetoothAdapter.scanOptimizer(false);
+        try {
+            bluetoothAdapter.scanOptimizer(false);
+        }catch (IllegalArgumentException e){
+            e.printStackTrace();
+        }
     }
 
     @Override
