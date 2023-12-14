@@ -43,7 +43,12 @@ public class UIElementsManager {
 //    }
 
     public static void refreshDeviceList(ArrayAdapter<String> arrayAdapter) {
+        int currentPosition = devicesDetectedList.getFirstVisiblePosition();
+        View currentView = devicesDetectedList.getChildAt(0);
+        int offset = (currentView == null) ? 0 : currentView.getTop();
         devicesDetectedList.setAdapter(arrayAdapter);
+
+        devicesDetectedList.setSelectionFromTop(currentPosition, offset);
     }
 
     public static void setScanButtonText(String text) {
