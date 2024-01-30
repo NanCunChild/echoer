@@ -1,7 +1,14 @@
 package com.nancunchild.echoer
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
+import android.content.Intent
+import android.net.wifi.WifiManager
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -46,11 +54,38 @@ fun ScreenLayout() {
     val wifiState = wifiViewModel.wifiState.observeAsState("Unknown")
 
     val context = LocalContext.current
-    val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+    val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
 
-    val bluetoothBtnColor = if (bluetoothState.value == "ON") Color.Blue else Color(0xFFD0D0D0)
-    val wifiBtnColor = if (wifiState.value == "ON") Color.Blue else Color(0xFFD0D0D0)
+    val bluetoothBtnColor =
+        if (bluetoothState.value == "ON") Color(0xFF1E90FF) else Color(0xFFD0D0D0)
+    val wifiBtnColor = if (wifiState.value == "ON") Color(0xFF1D88FF) else Color(0xFFD0D0D0)
     Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val image: Painter = painterResource(id = R.drawable.echoer_main_screen_logo)
+                Image(
+                    painter = image,
+                    contentDescription = "Echoer",
+                    modifier = Modifier
+                        .height(64.dp)
+                        .width(64.dp)
+                )
+                Text(
+                    text = "ECHOER",
+                    modifier = Modifier
+                        .padding(12.dp),
+                )
+            }
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -69,7 +104,7 @@ fun ScreenLayout() {
                 text = {
                     Column {
                         Text("WiFi")
-                        Text("Connect")
+                        Text(wifiState.value)
                     }
                 },
                 onClick = { /* 处理点击事件 */ },
@@ -91,16 +126,27 @@ fun ScreenLayout() {
                 text = {
                     Column {
                         Text("Bluetooth")
-                        Text("Connect")
+                        Text(bluetoothState.value)
                     }
                 },
                 onClick = {
-                    bluetoothAdapter?.let {
-                        if (it.isEnabled) {
-                            it.disable()
+                    bluetoothAdapter?.let { adapter ->
+                        if (!adapter.isEnabled) {
+                            // 启动意图提示用户开启蓝牙
+                            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                            context.startActivity(enableBtIntent)
                         } else {
-                            it.enable()
+                            Log.d("Bluetooth", "请手动关闭蓝牙或导航到设置页面")
+                            // 真的无语了，怎么会有打得开关不掉的神奇设定啊卧槽。BYD谷歌不想让开发者开发就别出标准了
+                            // 可以使用下面的代码片段导航到蓝牙设置页面
+                            // val intentOpenBluetoothSettings = Intent()
+                            // intentOpenBluetoothSettings.action = Settings.ACTION_BLUETOOTH_SETTINGS
+                            // context.startActivity(intentOpenBluetoothSettings)
                         }
+                    } ?: run {
+                        // adapter 为 null，处理没有蓝牙适配器的情况
+                        // 不会现在还有安卓设备没有蓝牙吧？没有蓝牙你用个锤子echoer
+                        Log.d("Bluetooth", "No Bluetooth adapter found.")
                     }
                 },
                 containerColor = bluetoothBtnColor,

@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.bluetooth.BluetoothManager
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
@@ -19,11 +20,15 @@ class MainActivity : ComponentActivity() {
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
     private val wifiViewModel: WifiViewModel by viewModels()
 
-    private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+    private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothStateReceiver: BroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        bluetoothAdapter = bluetoothManager.adapter
+        bluetoothViewModel.initBluetoothState(bluetoothAdapter)
+
         setupBluetoothStateReceiver()
         setupWifiStateReceiver()
         setContent {
@@ -56,10 +61,12 @@ class MainActivity : ComponentActivity() {
 
                             BluetoothAdapter.STATE_TURNING_ON -> {
                                 Log.v("Bluetooth", "Bluetooth Turning ON")
+                                bluetoothViewModel.updateBluetoothState("Turning ON...")
                             }
 
                             BluetoothAdapter.STATE_TURNING_OFF -> {
                                 Log.v("Bluetooth", "Bluetooth Turning OFF")
+                                bluetoothViewModel.updateBluetoothState("Turning OFF...")
                             }
 
                             BluetoothAdapter.STATE_CONNECTED -> {
@@ -94,7 +101,10 @@ class MainActivity : ComponentActivity() {
         registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == WifiManager.WIFI_STATE_CHANGED_ACTION) {
-                    val wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN)
+                    val wifiState = intent.getIntExtra(
+                        WifiManager.EXTRA_WIFI_STATE,
+                        WifiManager.WIFI_STATE_UNKNOWN
+                    )
                     when (wifiState) {
                         WifiManager.WIFI_STATE_ENABLED -> wifiViewModel.updateWifiState("ON")
                         WifiManager.WIFI_STATE_DISABLED -> wifiViewModel.updateWifiState("OFF")
@@ -104,8 +114,6 @@ class MainActivity : ComponentActivity() {
             }
         }, wifiFilter)
     }
-
-
 
 
     override fun onDestroy() {
@@ -118,15 +126,24 @@ class MainActivity : ComponentActivity() {
 class BluetoothViewModel : ViewModel() {
     val bluetoothState = MutableLiveData<String>()
 
+    fun initBluetoothState(adapter: BluetoothAdapter?) {
+        // 这个方法用来在打开应用的时候手动进行第一次蓝牙状态探测
+        bluetoothState.value = when {
+            adapter == null -> "Not Supported"
+            adapter.isEnabled -> "ON"
+            else -> "OFF"
+        }
+    }
+
     fun updateBluetoothState(state: String) {
         bluetoothState.value = state
     }
 }
 
-class WifiViewModel : ViewModel(){
+class WifiViewModel : ViewModel() {
     val wifiState = MutableLiveData<String>()
 
-    fun updateWifiState(state: String){
+    fun updateWifiState(state: String) {
         wifiState.value = state
     }
 }
