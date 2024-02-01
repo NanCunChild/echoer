@@ -6,6 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.bluetooth.BluetoothManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
@@ -30,6 +33,7 @@ class MainActivity : ComponentActivity() {
         bluetoothViewModel.initBluetoothState(bluetoothAdapter)
 
         setupBluetoothStateReceiver()
+        setupWifiInfoReceiver()
         setupWifiStateReceiver()
         setContent {
             val context = LocalContext.current
@@ -115,6 +119,31 @@ class MainActivity : ComponentActivity() {
         }, wifiFilter)
     }
 
+    private fun setupWifiInfoReceiver() {
+        val wifiFilter = IntentFilter().apply {
+            addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+        }
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                val activeNetwork = connectivityManager.activeNetwork
+                val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
+
+                if (networkCapabilities != null && networkCapabilities.hasTransport(
+                        NetworkCapabilities.TRANSPORT_WIFI)) {
+                    val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                    val wifiInfo = wifiManager.connectionInfo
+                    if (wifiInfo != null && wifiInfo.networkId != -1) {
+                        // 从wifiInfo获取SSID和BSSID并更新ViewModel
+                        val ssid = if (wifiInfo.ssid != null) wifiInfo.ssid.trim('"') else "" // 去除SSID周围的引号
+                        val bssid = wifiInfo.bssid ?: ""
+                        Log.v("wifi",wifiInfo.toString())
+                        wifiViewModel.updateWifiInfo(ssid, bssid)
+                    }
+                }
+            }
+        }, wifiFilter)
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -142,9 +171,17 @@ class BluetoothViewModel : ViewModel() {
 
 class WifiViewModel : ViewModel() {
     val wifiState = MutableLiveData<String>()
+    val currentSSID = MutableLiveData<String>()
+    val currentBSSID = MutableLiveData<String>()
 
     fun updateWifiState(state: String) {
         wifiState.value = state
     }
+
+    fun updateWifiInfo(ssid: String, bssid: String) {
+        currentSSID.value = ssid
+        currentBSSID.value = bssid
+    }
 }
+
 
