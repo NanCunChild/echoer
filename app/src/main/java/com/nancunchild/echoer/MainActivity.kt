@@ -33,11 +33,12 @@ class MainActivity : ComponentActivity() {
         bluetoothViewModel.initBluetoothState(bluetoothAdapter)
 
         setupBluetoothStateReceiver()
-        setupWifiInfoReceiver()
         setupWifiStateReceiver()
+        setupWifiInfoReceiver()
+
         setContent {
             val context = LocalContext.current
-            ScreenLayout()
+            HomeScreen().ScreenLayout()
         }
     }
 
