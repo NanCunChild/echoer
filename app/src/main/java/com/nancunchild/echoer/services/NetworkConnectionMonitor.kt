@@ -1,7 +1,4 @@
-package com.nancunchild.echoer
-// 暂时不打算使用这个类，因为我不知道如何在Compose中使用它
-// 我会直接在MainActivity中添加监听逻辑
-// 1/28/2024 NanCunChild
+package com.nancunchild.echoer.services
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice

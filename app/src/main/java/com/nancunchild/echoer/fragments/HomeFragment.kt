@@ -1,5 +1,6 @@
-package com.nancunchild.echoer
+package com.nancunchild.echoer.fragments
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -7,6 +8,7 @@ import android.content.Intent
 import android.net.wifi.WifiManager
 import android.provider.Settings
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -32,7 +34,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -41,36 +42,39 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.nancunchild.echoer.R
+import com.nancunchild.echoer.services.BluetoothScanner
+import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
+import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
+import com.nancunchild.echoer.viewmodels.BluetoothScannerViewModel
 
-class HomeScreen{
-    private lateinit var scannerViewModel: ScannerViewModel
+class HomeScreen : ComponentActivity() {
+    private val bluetoothScannerViewModel: BluetoothScannerViewModel by viewModels()
+//    private lateinit var bluetoothScanner: BluetoothScanner
 
+    @SuppressLint("MissingPermission")
     @Composable
     fun ScreenLayout() {
         val context = LocalContext.current
         // 获取 ViewModel 实例
-        val bluetoothViewModel: BluetoothViewModel = viewModel()
+        val bluetoothViewModel: BluetoothStatusViewModel = viewModel()
         // 观察 ViewModel 中的状态
         val bluetoothState = bluetoothViewModel.bluetoothState.observeAsState("Unknown")
 
         // 同理，注册wifi的ViewModel，然后观察是否连接以及连接的wifi信息
-        val wifiViewModel: WifiViewModel = viewModel()
+        val wifiViewModel: WiFiStatusViewModel = viewModel()
         val wifiState = wifiViewModel.wifiState.observeAsState("Unknown")
         val wifiBSSID = wifiViewModel.currentBSSID.observeAsState("Unknown")
         val wifiSSID = wifiViewModel.currentSSID.observeAsState("Unknown")
 
-        val deviceScanner = DeviceScanner(context)
-        scannerViewModel = ScannerViewModel(deviceScanner)
-        // 蓝牙BC扫描，注册以及观察ViewModel
-//    val bluetoothClassicDeviceViewModel:ScannerViewModel= viewModel()
-//    val bluetoothClassicDevices = bluetoothClassicDeviceViewModel.bluetoothClassicDevices.observeAsState(null)
-
         // 存储蓝牙调用上下文
-        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothManager =
+            context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
+
 
         val wifiManager =
             context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -78,6 +82,7 @@ class HomeScreen{
         val bluetoothBtnColor =
             if (bluetoothState.value == "ON") Color(0xFF1E90FF) else Color(0xFFD0D0D0)
         val wifiBtnColor = if (wifiState.value == "ON") Color(0xFF1D88FF) else Color(0xFFD0D0D0)
+
 
         Column {
             Row(
@@ -158,8 +163,14 @@ class HomeScreen{
                         bluetoothAdapter?.let { adapter ->
                             if (!adapter.isEnabled) {
                                 // 启动意图提示用户开启蓝牙
-                                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                                context.startActivity(enableBtIntent)
+                                try {
+                                    val enableBtIntent =
+                                        Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                                    context.startActivity(enableBtIntent)
+                                } catch (e: Exception) {
+                                    Log.v("OpenSetting", "Error in Intent$e")
+                                }
+
                             } else {
                                 Log.d("Bluetooth", "请手动关闭蓝牙或导航到设置页面")
                                 // 真的无语了，怎么会有打得开关不掉的神奇设定啊卧槽。BYD谷歌不想让开发者开发就别出标准了
@@ -197,24 +208,12 @@ class HomeScreen{
                     Text(text = "WiFi Scan(System)")
                 }
                 Button(onClick = {
-                    scannerViewModel.startScanning()
                 }) {
                     Text(text = "Bluetooth Scan (Test)")
                 }
             }
 
             WireItems(headline = "1")
-        }
-    }
-
-    // 自定义的 ViewModelFactory
-    class ScannerViewModelFactory(private val deviceScanner: DeviceScanner) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(ScannerViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return ScannerViewModel(deviceScanner) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
 
