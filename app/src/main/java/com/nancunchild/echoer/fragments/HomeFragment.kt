@@ -10,8 +10,6 @@ import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -21,18 +19,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,17 +35,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.activity.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nancunchild.echoer.R
-import com.nancunchild.echoer.services.BluetoothScanner
+import com.nancunchild.echoer.ui_components.ScannedDevicesList
 import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
 import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
 import com.nancunchild.echoer.viewmodels.BluetoothScannerViewModel
 
 class HomeScreen : ComponentActivity() {
     private val bluetoothScannerViewModel: BluetoothScannerViewModel by viewModels()
-//    private lateinit var bluetoothScanner: BluetoothScanner
 
     @SuppressLint("MissingPermission")
     @Composable
@@ -213,57 +203,8 @@ class HomeScreen : ComponentActivity() {
                 }
             }
 
-            WireItems(headline = "1")
+            ScannedDevicesList().DevicesList(headline = "1")
         }
-    }
-
-    @Composable
-    fun WireItems(
-        icon: @Composable (() -> Unit)? = null,
-        headline: String,
-        supportingText: String? = null,
-        trailingSupportingText: String? = null
-    ) {
-        LazyColumn() {
-            items(5) { index ->
-                WireItem(
-                    headlineContent = { Text(headline + "Item: $index") },
-                    supportingContent = { Text("Secondary text") },
-                    trailingContent = { Text("meta") },
-                    leadingContent = {
-                        Icon(
-                            Icons.Filled.Favorite,
-                            contentDescription = "Localized description"
-                        )
-                    },
-                    onItemClick = {}
-                )
-            }
-        }
-    }
-
-    @Composable
-    fun WireItem(
-        headlineContent: @Composable () -> Unit,
-        supportingContent: @Composable () -> Unit,
-        trailingContent: @Composable () -> Unit,
-        leadingContent: @Composable () -> Unit,
-        onItemClick: () -> Unit // 点击事件的处理函数
-    ) {
-        val interactionSource = remember { MutableInteractionSource() }
-        ListItem(
-            headlineContent = headlineContent,
-            supportingContent = supportingContent,
-            trailingContent = trailingContent,
-            leadingContent = leadingContent,
-            modifier = Modifier
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = rememberRipple(bounded = true, color = Color.LightGray),
-                    onClick = onItemClick
-                )
-                .padding(8.dp)
-        )
     }
 }
 

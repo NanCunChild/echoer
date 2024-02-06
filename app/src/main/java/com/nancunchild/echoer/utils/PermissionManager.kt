@@ -1,19 +1,19 @@
 package com.nancunchild.echoer.utils
 
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
 class PermissionManager(
-    private val appCompatActivity: AppCompatActivity,
+    private val componentActivity: ComponentActivity,
     private val permissionNeeded: Array<String>
     // 传入参数为需要请求的权限
 ) {
@@ -39,7 +39,7 @@ class PermissionManager(
     // 权限请求结果处理器
     private fun setupPermissionAuthResultListener() {
         requestPermissionLauncher =
-            appCompatActivity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            componentActivity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
                 val deniedPermissions = result.entries.filter { !it.value }.map { it.key }
 
                 authResultActorCallBack?.let {
@@ -52,11 +52,11 @@ class PermissionManager(
             }
     }
 
-    // 判断是否已经拥有所请求的权限
+    // 判断是否已经拥有所请求的权限，这个方法通过遍历权限表判断是否拥有这些权限，返回的是缺失的权限列表
     fun hasPermissions(): Array<String> {
         return permissionNeeded.filter {
             ContextCompat.checkSelfPermission(
-                appCompatActivity,
+                componentActivity,
                 it
             ) != PackageManager.PERMISSION_GRANTED
         }.toTypedArray()
@@ -67,25 +67,24 @@ class PermissionManager(
         val permissionsNotGranted = hasPermissions()
         return if (permissionsNotGranted.isNotEmpty()) {
             val permanentlyDenied = permissionsNotGranted.filter {
-                !appCompatActivity.shouldShowRequestPermissionRationale(it)
+                componentActivity.shouldShowRequestPermissionRationale(it)
             }
             /*
                     shouldShowRequestPermissionRationale()的作用:
                         1，没有申请过权限，申请就是了，所以返回false；
                         2，申请了用户拒绝了，就要提示用户，所以返回true；
-                        3，已经允许了，不需要申请也不需要提示，所以返回false；
+                        3，已经允许了，不需要申请也不需要提示，所以返回false；此处不会，因为前面使用hasPermission检查过了
                         4，用户选择了拒绝并且不再提示，那你也不要申请了，也不要提示用户了，所以返回false；
             */
-
             if (permanentlyDenied.isEmpty()) {
                 requestPermissionLauncher.launch(permissionsNotGranted)
                 true
             } else {
                 Log.d("Permission", "Permission Cannot Be Permitted In App. $permanentlyDenied")
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                val uri = Uri.fromParts("package", appCompatActivity.packageName, null)
+                val uri = Uri.fromParts("package", componentActivity.packageName, null)
                 intent.data = uri
-                appCompatActivity.startActivity(intent)
+                componentActivity.startActivity(intent)
                 false
             }
         } else {
