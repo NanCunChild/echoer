@@ -69,7 +69,7 @@ class WiFiStatusMonitor(private val context: Context, private val viewModel: WiF
                     if (wifiInfo != null && wifiInfo.networkId != -1) {
                         val ssid = wifiInfo.ssid?.trim('"') ?: "" // 去除SSID周围的引号
                         val bssid = wifiInfo.bssid ?: ""
-                        Log.v("wifi", wifiInfo.toString())
+                        Log.v("WiFiStatusMonitor", wifiInfo.toString())
                         viewModel.updateWifiInfo(ssid, bssid)
                     }
                 }
@@ -82,7 +82,7 @@ class WiFiStatusMonitor(private val context: Context, private val viewModel: WiF
             }
             context.registerReceiver(wifiInfoReceiver, wifiFilter)
         } catch (e: Exception) {
-            Log.e("WifiStatusMonitor", "Error registering wifi info receiver: ${e.message}")
+            Log.e("WiFiStatusMonitor", "Error registering wifi info receiver: ${e.message}")
         }
     }
 

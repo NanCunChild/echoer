@@ -6,13 +6,10 @@ import android.content.Context
 import android.bluetooth.BluetoothManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.LocalContext
 import com.nancunchild.echoer.fragments.HomeScreen
 import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
@@ -21,10 +18,12 @@ import com.nancunchild.echoer.services.BluetoothStatusMonitor
 import com.nancunchild.echoer.services.WiFiStatusMonitor
 import com.nancunchild.echoer.services.BluetoothScanner
 import com.nancunchild.echoer.utils.PermissionManager
+import com.nancunchild.echoer.viewmodels.BluetoothScannerViewModel
 
 class MainActivity : ComponentActivity() {
     private val bluetoothStatusViewModel: BluetoothStatusViewModel by viewModels()
     private val wifiStatusViewModel: WiFiStatusViewModel by viewModels()
+    private val bluetoothScannerViewModel: BluetoothScannerViewModel by viewModels()
 
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothStatusMonitor: BluetoothStatusMonitor
@@ -104,21 +103,28 @@ class MainActivity : ComponentActivity() {
         // 初始化蓝牙状态监视器
         bluetoothStatusMonitor = BluetoothStatusMonitor(this, bluetoothStatusViewModel)
         bluetoothStatusMonitor.startMonitoring()
+
         // 初始化wifi状态监视器
         wifiStatusMonitor = WiFiStatusMonitor(this, wifiStatusViewModel)
         wifiStatusMonitor.startMonitoring()
+
+        // 蓝牙扫描器初始化
+        bluetoothScanner = BluetoothScanner(this, bluetoothScannerViewModel)
+        bluetoothScanner.startScanning()
     }
 
     override fun onResume() {
         super.onResume()
         bluetoothStatusMonitor.startMonitoring()
         wifiStatusMonitor.startMonitoring()
+        bluetoothScanner.stopScanning()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         bluetoothStatusMonitor.stopMonitoring()
         wifiStatusMonitor.stopMonitoring()
+        bluetoothScanner.stopScanning()
     }
 }
 

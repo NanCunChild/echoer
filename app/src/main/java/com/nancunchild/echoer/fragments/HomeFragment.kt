@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.activity.viewModels
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nancunchild.echoer.R
+import com.nancunchild.echoer.services.BluetoothScanner
 import com.nancunchild.echoer.ui_components.ScannedDevicesList
 import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
 import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
@@ -44,6 +45,7 @@ import com.nancunchild.echoer.viewmodels.BluetoothScannerViewModel
 
 class HomeScreen : ComponentActivity() {
     private val bluetoothScannerViewModel: BluetoothScannerViewModel by viewModels()
+    private lateinit var bluetoothScanner: BluetoothScanner
 
     @SuppressLint("MissingPermission")
     @Composable
@@ -65,9 +67,11 @@ class HomeScreen : ComponentActivity() {
             context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
 
-
         val wifiManager =
             context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+        val bluetoothScannerViewModel: BluetoothScannerViewModel = viewModel()
+        val bluetoothDevices = bluetoothScannerViewModel.scannedDevices.observeAsState(emptyList())
 
         val bluetoothBtnColor =
             if (bluetoothState.value == "ON") Color(0xFF1E90FF) else Color(0xFFD0D0D0)
@@ -198,12 +202,14 @@ class HomeScreen : ComponentActivity() {
                     Text(text = "WiFi Scan(System)")
                 }
                 Button(onClick = {
+                    bluetoothScanner = BluetoothScanner(context, bluetoothScannerViewModel)
+                    bluetoothScanner.startScanning()
                 }) {
                     Text(text = "Bluetooth Scan (Test)")
                 }
             }
 
-            ScannedDevicesList().DevicesList(headline = "1")
+            ScannedDevicesList().DevicesList(bluetoothDevices.value)
         }
     }
 }
