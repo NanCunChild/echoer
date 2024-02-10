@@ -129,7 +129,13 @@ class MainActivity : ComponentActivity() {
 
         // 蓝牙扫描器初始化
         bluetoothScanner = BluetoothScanner(this, scannerViewModel)
-        bluetoothScanner.startScanning()
+        if(bluetoothAdapter.isEnabled){
+            Log.v("BluetoothScan","Bluetooth Is Enabled. Start Scanning...")
+            bluetoothScanner.startScanning()
+        }else{
+            Log.v("BluetoothScan","Bluetooth Is Not Enabled.")
+        }
+
     }
 
     /**

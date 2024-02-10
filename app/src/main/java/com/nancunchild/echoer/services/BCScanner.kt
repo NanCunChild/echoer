@@ -42,7 +42,7 @@ class BluetoothScanner(
                         }
 
                     device?.let {
-                        Log.v("Bluetooth", it.name.toString())
+                        Log.v("BluetoothScan", it.name ?: "Unknown Device")
                         val standardizedDeviceData = DeviceAdapter.fromBCScanResult(it)
                         viewModel.updateBCScannedDevices(standardizedDeviceData)
                     }
