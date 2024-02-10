@@ -41,10 +41,10 @@ import com.nancunchild.echoer.services.BluetoothScanner
 import com.nancunchild.echoer.ui_components.ScannedDevicesList
 import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
 import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
-import com.nancunchild.echoer.viewmodels.BluetoothScannerViewModel
+import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
 class HomeScreen : ComponentActivity() {
-    private val bluetoothScannerViewModel: BluetoothScannerViewModel by viewModels()
+    private val scannerViewModel: ScannerViewModel by viewModels()
     private lateinit var bluetoothScanner: BluetoothScanner
 
     @SuppressLint("MissingPermission")
@@ -70,8 +70,8 @@ class HomeScreen : ComponentActivity() {
         val wifiManager =
             context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-        val bluetoothScannerViewModel: BluetoothScannerViewModel = viewModel()
-        val bluetoothDevices = bluetoothScannerViewModel.scannedDevices.observeAsState(emptyList())
+        val scannerViewModel: ScannerViewModel = viewModel()
+        val bluetoothDevices = scannerViewModel.bcScanDevices.observeAsState(emptyList())
 
         val bluetoothBtnColor =
             if (bluetoothState.value == "ON") Color(0xFF1E90FF) else Color(0xFFD0D0D0)
@@ -202,7 +202,7 @@ class HomeScreen : ComponentActivity() {
                     Text(text = "WiFi Scan(System)")
                 }
                 Button(onClick = {
-                    bluetoothScanner = BluetoothScanner(context, bluetoothScannerViewModel)
+                    bluetoothScanner = BluetoothScanner(context, scannerViewModel)
                     bluetoothScanner.startScanning()
                 }) {
                     Text(text = "Bluetooth Scan (Test)")

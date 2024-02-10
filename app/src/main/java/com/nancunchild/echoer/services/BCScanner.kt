@@ -12,12 +12,12 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nancunchild.echoer.adapters.DeviceAdapter
-import com.nancunchild.echoer.viewmodels.BluetoothScannerViewModel
+import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
 @SuppressLint("MissingPermission")
 class BluetoothScanner(
     private val context: Context,
-    private val viewModel: BluetoothScannerViewModel
+    private val viewModel: ScannerViewModel
 ) {
     private val bluetoothManager =
         context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -42,9 +42,9 @@ class BluetoothScanner(
                         }
 
                     device?.let {
-                        Log.v("Bluetooth", it.name.toString())
+                        Log.v("BluetoothScan", it.name ?: "Unknown Device")
                         val standardizedDeviceData = DeviceAdapter.fromBCScanResult(it)
-                        viewModel.updateScannedDevices(standardizedDeviceData)
+                        viewModel.updateBCScannedDevices(standardizedDeviceData)
                     }
                 }
 
@@ -64,7 +64,7 @@ class BluetoothScanner(
                 addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
             }
             context.registerReceiver(receiver, filter)
-            viewModel.clearScannedDevices()
+            viewModel.clearBCScannedDevices()
             bluetoothAdapter.startDiscovery()
         } else {
             Log.e("BluetoothScanner", "Bluetooth is not enabled")
