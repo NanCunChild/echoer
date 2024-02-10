@@ -6,6 +6,7 @@ import android.content.Context
 import android.bluetooth.BluetoothManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,12 +19,20 @@ import com.nancunchild.echoer.services.BluetoothStatusMonitor
 import com.nancunchild.echoer.services.WiFiStatusMonitor
 import com.nancunchild.echoer.services.BluetoothScanner
 import com.nancunchild.echoer.utils.PermissionManager
-import com.nancunchild.echoer.viewmodels.BluetoothScannerViewModel
+import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
+/**
+ * 主活动类，是应用的入口点。负责初始化和管理应用的核心组件，包括权限请求、蓝牙和 Wi-Fi 状态监视器、以及 UI 设置。
+ *
+ * 在 onCreate 方法中，应用会请求一系列运行时权限，这些权限对于应用的正常运行是必需的。权限请求的结果会决定是否初始化硬件适配器和状态监视器。
+ * 如果所有需要的权限都已授予，应用将继续初始化蓝牙和 Wi-Fi 适配器，并开始监视它们的状态。否则，应用将等待用户授予权限。
+ *
+ * 此外，MainActivity 还处理了应用的生命周期事件，如 onResume 和 onDestroy，以确保在应用运行期间正确地开始和停止硬件设备的监视。
+ */
 class MainActivity : ComponentActivity() {
     private val bluetoothStatusViewModel: BluetoothStatusViewModel by viewModels()
     private val wifiStatusViewModel: WiFiStatusViewModel by viewModels()
-    private val bluetoothScannerViewModel: BluetoothScannerViewModel by viewModels()
+    private val scannerViewModel: ScannerViewModel by viewModels()
 
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothStatusMonitor: BluetoothStatusMonitor
@@ -33,6 +42,11 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var permissionManager: PermissionManager
 
+    /**
+     * 在活动创建时调用。初始化权限管理器，请求必要的运行时权限，并设置 UI 布局。
+     *
+     * @param savedInstanceState 如果活动之前被终止，则包含活动之前的状态信息的 Bundle；否则为 null。
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -64,6 +78,7 @@ class MainActivity : ComponentActivity() {
 
 
         if (permissionManager.hasPermissions().isEmpty()) {
+            Log.v("PermissionManager","All Permissions granted.")
             initializeAdapters()
         } else {
             permissionManager.setPermissionAuthResultActor(object :
@@ -94,6 +109,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * 初始化硬件适配器和状态监视器。此方法在所有必要的权限被授予后调用。
+     * 它负责设置蓝牙管理器、蓝牙和 Wi-Fi 状态监视器，以及蓝牙扫描器。
+     */
     fun initializeAdapters() {
         // 此处是为了手动执行一次蓝牙检测
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -109,10 +128,13 @@ class MainActivity : ComponentActivity() {
         wifiStatusMonitor.startMonitoring()
 
         // 蓝牙扫描器初始化
-        bluetoothScanner = BluetoothScanner(this, bluetoothScannerViewModel)
+        bluetoothScanner = BluetoothScanner(this, scannerViewModel)
         bluetoothScanner.startScanning()
     }
 
+    /**
+     * 在活动恢复时调用。确保在活动重新成为用户可见时，重新开始监视蓝牙和 Wi-Fi 状态，以及停止蓝牙扫描。
+     */
     override fun onResume() {
         super.onResume()
         bluetoothStatusMonitor.startMonitoring()
@@ -120,6 +142,9 @@ class MainActivity : ComponentActivity() {
         bluetoothScanner.stopScanning()
     }
 
+    /**
+     * 在活动销毁时调用。确保在活动销毁前停止所有的硬件状态监视和蓝牙扫描，以释放资源。
+     */
     override fun onDestroy() {
         super.onDestroy()
         bluetoothStatusMonitor.stopMonitoring()
