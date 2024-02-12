@@ -5,6 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.nancunchild.echoer.adapters.DeviceAdapter
 
+/**
+ * 这个类用于使用ViewModel存储扫描结果，也是负责从逻辑到UI的传递
+ * 注意：
+ * 蓝牙返回结果为单个出现，每次发现一个
+ * WiFi扫描结果是成组出现，每次发现一组
+ * 因此两个的存储逻辑稍有区别
+ */
 class ScannerViewModel: ViewModel() {
     private val _bcScanDevices = MutableLiveData<List<DeviceAdapter>>()
     private val _wifiScanDevices = MutableLiveData<List<DeviceAdapter>>()
@@ -21,9 +28,8 @@ class ScannerViewModel: ViewModel() {
         _bcScanDevices.value = emptyList()
     }
 
-    fun updateWiFiScannedDevices(device: DeviceAdapter){
-        val currentList = _wifiScanDevices.value ?: emptyList()
-        _wifiScanDevices.value = currentList + device
+    fun updateWiFiScannedDevices(devices: List<DeviceAdapter>){
+        _wifiScanDevices.value = devices
     }
 
     fun clearWiFiScannedDevices(){

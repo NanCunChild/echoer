@@ -1,7 +1,13 @@
 package com.nancunchild.echoer.adapters
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 
+/**
+ * 这个类负责对蓝牙和WiFi数据的规范化，将数据转化为方便UI调用的方式，减少UI逻辑的复杂度
+ * 大部分参数都有官方手册介绍含义
+ * deviceClass有三种情况："bluetooth","wifi","dual"
+ */
 data class DeviceAdapter(
     val bluetoothName: String? = null,
     val bluetoothAddress: String? = null,
@@ -14,6 +20,7 @@ data class DeviceAdapter(
     val deviceClass: String? = null
 ) {
     companion object {
+        @SuppressLint("MissingPermission")
         fun fromBCScanResult(device: BluetoothDevice): DeviceAdapter {
             return DeviceAdapter(
                 bluetoothName = device.name,
@@ -23,14 +30,16 @@ data class DeviceAdapter(
             )
         }
 
-        fun fromWiFiScanResult(scanResult: android.net.wifi.ScanResult): DeviceAdapter {
-            return DeviceAdapter(
-                wifiSSID = scanResult.SSID,
-                wifiBSSID = scanResult.BSSID,
-                wifiFrequency = scanResult.frequency,
-                wifiLevel = scanResult.level,
-                deviceClass = "wifi"
-            )
+        fun fromWiFiScanResult(scanResults: List<android.net.wifi.ScanResult>): List<DeviceAdapter> {
+            return scanResults.map { scanResult ->
+                DeviceAdapter(
+                        wifiSSID = scanResult.SSID,
+                        wifiBSSID = scanResult.BSSID,
+                        wifiFrequency = scanResult.frequency,
+                        wifiLevel = scanResult.level,
+                        deviceClass = "wifi"
+                )
+            }
         }
 
         fun mergeDual(deviceBCAdapter: DeviceAdapter, deviceWiFiAdapter: DeviceAdapter) {
