@@ -10,7 +10,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.util.Log
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nancunchild.echoer.adapters.DeviceAdapter
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
