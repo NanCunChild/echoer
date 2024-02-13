@@ -38,6 +38,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nancunchild.echoer.R
 import com.nancunchild.echoer.services.BluetoothScanner
+import com.nancunchild.echoer.services.WiFiScanner
 import com.nancunchild.echoer.ui_components.ScannedDevicesList
 import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
 import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
@@ -46,6 +47,7 @@ import com.nancunchild.echoer.viewmodels.ScannerViewModel
 class HomeScreen : ComponentActivity() {
     private val scannerViewModel: ScannerViewModel by viewModels()
     private lateinit var bluetoothScanner: BluetoothScanner
+    private lateinit var wifiScanner: WiFiScanner
 
     @SuppressLint("MissingPermission")
     @Composable
@@ -197,15 +199,16 @@ class HomeScreen : ComponentActivity() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(onClick = {
-
+                    wifiScanner = WiFiScanner(context, scannerViewModel)
+                    wifiScanner.startScanning()
                 }) {
-                    Text(text = "WiFi Scan(System)")
+                    Text(text = "WiFi Scan (Test)")
                 }
                 Button(onClick = {
                     bluetoothScanner = BluetoothScanner(context, scannerViewModel)
                     bluetoothScanner.startScanning()
                 }) {
-                    Text(text = "Bluetooth Scan (Test)")
+                    Text(text = "Bluetooth Scan")
                 }
             }
 

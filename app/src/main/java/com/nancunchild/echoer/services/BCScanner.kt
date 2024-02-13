@@ -10,7 +10,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.util.Log
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nancunchild.echoer.adapters.DeviceAdapter
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
@@ -42,14 +41,14 @@ class BluetoothScanner(
                         }
 
                     device?.let {
-                        Log.v("BluetoothScan", it.name ?: "Unknown Device")
                         val standardizedDeviceData = DeviceAdapter.fromBCScanResult(it)
                         viewModel.updateBCScannedDevices(standardizedDeviceData)
+                        Log.v("BCScanner",standardizedDeviceData.toString())
                     }
                 }
 
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-                    stopScanning() // Optional: Stop scanning once discovery is finished
+                    stopScanning()
                 }
             }
         }
