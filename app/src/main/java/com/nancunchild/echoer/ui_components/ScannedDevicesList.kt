@@ -1,23 +1,27 @@
 package com.nancunchild.echoer.ui_components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
+import com.nancunchild.echoer.R
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.nancunchild.echoer.adapters.DeviceAdapter
 
+/**
+ * 这个类为UI类，是直接显示在HomeScreen上的设备列表
+ * 负责了部分列表数据的样式
+ */
 class ScannedDevicesList {
     @Composable
     fun DevicesList(
@@ -27,19 +31,64 @@ class ScannedDevicesList {
             items(
                 items = devices,
                 itemContent = { device ->
-                Device(
-                    headlineContent = { Text(device.bluetoothName ?: "Unknown Device" )},
-                    supportingContent = { Text(device.bluetoothAddress ?: "No Data") },
-                    trailingContent = { Text("BC") },
-                    leadingContent = {
-                        Icon(
-                            Icons.Filled.Favorite,
-                            contentDescription = "Devices"
-                        )
-                    },
-                    onItemClick = {}
-                )
-            })
+                    Device(
+                        headlineContent = {
+                            when (device.deviceClass) {
+                                "bluetooth" -> Text(device.bluetoothName ?: "Unknown BCName")
+                                "wifi" -> Text(device.wifiSSID ?: "Unknown SSID")
+                                "dual" -> Text(device.wifiSSID ?: "Unknown SSID")
+                            }
+                        },
+                        supportingContent = {
+                            when (device.deviceClass) {
+                                "bluetooth" -> Text(device.bluetoothAddress ?: "Unknown")
+                                "wifi" -> Text(device.wifiBSSID ?: "Unknown")
+                                "dual" -> Text(device.wifiSSID ?: "Unknown")
+                            }
+                        },
+                        trailingContent = {
+                            when (device.deviceClass) {
+                                "bluetooth" -> Text("BC")
+                                "wifi" -> Text("WiFi")
+                                "dual" -> Text("DUAL")
+                            }
+                        },
+                        leadingContent = {
+                            when (device.deviceClass) {
+                                "bluetooth" -> Image(
+                                    painter = painterResource(id = R.drawable.baseline_bluetooth_24),
+                                    contentDescription = "Bluetooth Device"
+                                )
+
+                                "wifi" -> when (device.wifiLevel) {
+                                    in -50..0 ->
+                                        Image(
+                                            painter = painterResource(id = R.drawable.baseline_wifi_3_24),
+                                            contentDescription = "WiFi Device"
+                                        )
+                                    in -70..-50 ->
+                                        Image(
+                                            painter = painterResource(id = R.drawable.baseline_wifi_2_24),
+                                            contentDescription = "WiFi Device"
+                                        )
+                                    in -100..-70 ->
+                                        Image(
+                                            painter = painterResource(id = R.drawable.baseline_wifi_1_24),
+                                            contentDescription = "WiFi Device"
+                                        )
+                                    else ->
+                                        Text("Error")
+                                }
+
+                                "dual" -> Image(
+                                    painter = painterResource(id = R.drawable.baseline_bluetooth_wifi_24),
+                                    contentDescription = "Unknown Device"
+                                )
+                            }
+                        },
+                        onItemClick = {}
+                    )
+                })
         }
     }
 
