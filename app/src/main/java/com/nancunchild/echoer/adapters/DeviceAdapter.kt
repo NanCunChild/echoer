@@ -33,17 +33,13 @@ data class DeviceAdapter(
         fun fromWiFiScanResult(scanResults: List<android.net.wifi.ScanResult>): List<DeviceAdapter> {
             return scanResults.map { scanResult ->
                 DeviceAdapter(
-                        wifiSSID = scanResult.SSID,
-                        wifiBSSID = scanResult.BSSID,
-                        wifiFrequency = scanResult.frequency,
-                        wifiLevel = scanResult.level,
-                        deviceClass = "wifi"
+                    wifiSSID = scanResult.SSID,
+                    wifiBSSID = scanResult.BSSID,
+                    wifiFrequency = scanResult.frequency,
+                    wifiLevel = scanResult.level,
+                    deviceClass = "wifi"
                 )
             }
-        }
-
-        fun mergeDual(deviceBCAdapter: DeviceAdapter, deviceWiFiAdapter: DeviceAdapter) {
-
         }
     }
 }

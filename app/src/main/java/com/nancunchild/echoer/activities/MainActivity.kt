@@ -11,13 +11,12 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.ui.platform.LocalContext
-import com.nancunchild.echoer.fragments.HomeScreen
+import com.nancunchild.echoer.fragments.HomeFragment
 import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
 import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
 import com.nancunchild.echoer.services.BluetoothStatusMonitor
 import com.nancunchild.echoer.services.WiFiStatusMonitor
-import com.nancunchild.echoer.services.BluetoothScanner
+import com.nancunchild.echoer.services.BCScanner
 import com.nancunchild.echoer.utils.PermissionManager
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
@@ -38,7 +37,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var bluetoothStatusMonitor: BluetoothStatusMonitor
     private lateinit var wifiStatusMonitor: WiFiStatusMonitor
 
-    private lateinit var bluetoothScanner: BluetoothScanner
+    private lateinit var mBCScanner: BCScanner
 
     private lateinit var permissionManager: PermissionManager
 
@@ -104,8 +103,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            val context = LocalContext.current
-            HomeScreen().ScreenLayout()
+            HomeFragment().ScreenLayout()
         }
     }
 
@@ -128,10 +126,10 @@ class MainActivity : ComponentActivity() {
         wifiStatusMonitor.startMonitoring()
 
         // 蓝牙扫描器初始化
-        bluetoothScanner = BluetoothScanner(this, scannerViewModel)
+        mBCScanner = BCScanner(this, scannerViewModel)
         if(bluetoothAdapter.isEnabled){
             Log.v("BluetoothScan","Bluetooth Is Enabled. Start Scanning...")
-            bluetoothScanner.startScanning()
+            mBCScanner.startScanning()
         }else{
             Log.v("BluetoothScan","Bluetooth Is Not Enabled.")
         }
@@ -145,7 +143,7 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         bluetoothStatusMonitor.startMonitoring()
         wifiStatusMonitor.startMonitoring()
-        bluetoothScanner.stopScanning()
+        mBCScanner.stopScanning()
     }
 
     /**
@@ -155,7 +153,7 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         bluetoothStatusMonitor.stopMonitoring()
         wifiStatusMonitor.stopMonitoring()
-        bluetoothScanner.stopScanning()
+        mBCScanner.stopScanning()
     }
 }
 

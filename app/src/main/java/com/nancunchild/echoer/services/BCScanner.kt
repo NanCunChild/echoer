@@ -14,7 +14,7 @@ import com.nancunchild.echoer.adapters.DeviceAdapter
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
 @SuppressLint("MissingPermission")
-class BluetoothScanner(
+class BCScanner(
     private val context: Context,
     private val viewModel: ScannerViewModel
 ) {

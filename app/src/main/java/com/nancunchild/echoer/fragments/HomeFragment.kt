@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
-import android.net.wifi.WifiManager
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -32,21 +31,20 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.activity.viewModels
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nancunchild.echoer.R
-import com.nancunchild.echoer.services.BluetoothScanner
+import com.nancunchild.echoer.services.BCScanner
 import com.nancunchild.echoer.services.WiFiScanner
 import com.nancunchild.echoer.ui_components.ScannedDevicesList
 import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
 import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
-class HomeScreen : ComponentActivity() {
-    private val scannerViewModel: ScannerViewModel by viewModels()
-    private lateinit var bluetoothScanner: BluetoothScanner
+class HomeFragment : ComponentActivity() {
+    private lateinit var mBCScanner: BCScanner
     private lateinit var wifiScanner: WiFiScanner
 
     @SuppressLint("MissingPermission")
@@ -59,26 +57,17 @@ class HomeScreen : ComponentActivity() {
         val bluetoothState = bluetoothViewModel.bluetoothState.observeAsState("Unknown")
 
         // 同理，注册wifi的ViewModel，然后观察是否连接以及连接的wifi信息
-        val wifiViewModel: WiFiStatusViewModel = viewModel()
-        val wifiState = wifiViewModel.wifiState.observeAsState("Unknown")
-        val wifiBSSID = wifiViewModel.currentBSSID.observeAsState("Unknown")
-        val wifiSSID = wifiViewModel.currentSSID.observeAsState("Unknown")
+        val currentWiFiStateViewModel: WiFiStatusViewModel = viewModel()
+        val currentWiFiState = currentWiFiStateViewModel.wifiState.observeAsState("Unknown")
+        val currentWiFiSSID = currentWiFiStateViewModel.currentSSID.observeAsState("Unknown")
 
         // 存储蓝牙调用上下文
         val bluetoothManager =
             context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
 
-        val wifiManager =
-            context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-
         val scannerViewModel: ScannerViewModel = viewModel()
-        val bluetoothDevices = scannerViewModel.bcScanDevices.observeAsState(emptyList())
-
-        val bluetoothBtnColor =
-            if (bluetoothState.value == "ON") Color(0xFF1E90FF) else Color(0xFFD0D0D0)
-        val wifiBtnColor = if (wifiState.value == "ON") Color(0xFF1D88FF) else Color(0xFFD0D0D0)
-
+        val allDevices = scannerViewModel.allScanDevices.observeAsState(emptyList())
 
         Column {
             Row(
@@ -118,22 +107,36 @@ class HomeScreen : ComponentActivity() {
                 ExtendedFloatingActionButton(
                     icon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.baseline_wifi_24),
+                            painter = painterResource(id = R.drawable.baseline_wifi_3_24),
                             contentDescription = "WiFi",
                             modifier = Modifier.size(24.dp)
                         )
                     },
                     text = {
                         Column {
-                            Text("WiFi " + wifiState.value, fontWeight = FontWeight.W500)
-                            Text(wifiSSID.value, fontWeight = FontWeight.W200)
+                            Text(
+                                text = "WiFi " + currentWiFiState.value,
+                                fontWeight = FontWeight.W500,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = currentWiFiSSID.value,
+                                fontWeight = FontWeight.W200,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     },
                     onClick = {
                         val intent = Intent(Settings.ACTION_WIFI_SETTINGS)
                         context.startActivity(intent)
                     },
-                    containerColor = wifiBtnColor,
+                    containerColor = when (currentWiFiState.value) {
+                        "ON" -> Color(0xFF1E90FF)
+                        "OFF" -> Color(0xFFD0D0D0)
+                        else -> Color(0xFFD0D0D0)
+                    },
                     contentColor = Color(0xCCFFFFFF),
                     modifier = Modifier
                         .height(IntrinsicSize.Min)
@@ -151,8 +154,18 @@ class HomeScreen : ComponentActivity() {
                     },
                     text = {
                         Column {
-                            Text("Bluetooth " + bluetoothState.value, fontWeight = FontWeight.W500)
-                            Text("TEXT", fontWeight = FontWeight.W200)
+                            Text(
+                                text = "Bluetooth " + bluetoothState.value,
+                                fontWeight = FontWeight.W500,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = "TEXT",
+                                fontWeight = FontWeight.W200,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     },
                     onClick = {
@@ -181,7 +194,11 @@ class HomeScreen : ComponentActivity() {
                         }
                     },
 
-                    containerColor = bluetoothBtnColor,
+                    containerColor = when (bluetoothState.value) {
+                        "ON" -> Color(0xFF1E90FF)
+                        "OFF" -> Color(0xFFD0D0D0)
+                        else -> Color(0xFFD0D0D0)
+                    },
                     contentColor = Color(0xCCFFFFFF),
                     modifier = Modifier
                         .height(IntrinsicSize.Min)
@@ -205,14 +222,14 @@ class HomeScreen : ComponentActivity() {
                     Text(text = "WiFi Scan (Test)")
                 }
                 Button(onClick = {
-                    bluetoothScanner = BluetoothScanner(context, scannerViewModel)
-                    bluetoothScanner.startScanning()
+                    mBCScanner = BCScanner(context, scannerViewModel)
+                    mBCScanner.startScanning()
                 }) {
                     Text(text = "Bluetooth Scan")
                 }
             }
 
-            ScannedDevicesList().DevicesList(bluetoothDevices.value)
+            ScannedDevicesList().DevicesList(allDevices.value)
         }
     }
 }
