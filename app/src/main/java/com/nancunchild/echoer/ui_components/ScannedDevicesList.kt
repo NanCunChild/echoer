@@ -66,16 +66,19 @@ class ScannedDevicesList {
                                             painter = painterResource(id = R.drawable.baseline_wifi_3_24),
                                             contentDescription = "WiFi Device"
                                         )
+
                                     in -70..-50 ->
                                         Image(
                                             painter = painterResource(id = R.drawable.baseline_wifi_2_24),
                                             contentDescription = "WiFi Device"
                                         )
+
                                     in -100..-70 ->
                                         Image(
                                             painter = painterResource(id = R.drawable.baseline_wifi_1_24),
                                             contentDescription = "WiFi Device"
                                         )
+
                                     else ->
                                         Text("Error")
                                 }

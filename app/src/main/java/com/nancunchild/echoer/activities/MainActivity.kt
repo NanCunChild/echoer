@@ -104,6 +104,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             HomeFragment().ScreenLayout()
+            HomeFragment().DoubleBackToExit(this)
+            HomeFragment().InitialScanning()
         }
     }
 
@@ -133,7 +135,6 @@ class MainActivity : ComponentActivity() {
         }else{
             Log.v("BluetoothScan","Bluetooth Is Not Enabled.")
         }
-
     }
 
     /**

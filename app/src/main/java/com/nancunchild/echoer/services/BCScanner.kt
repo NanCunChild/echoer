@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import com.nancunchild.echoer.adapters.DeviceAdapter
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
@@ -67,6 +68,7 @@ class BCScanner(
             bluetoothAdapter.startDiscovery()
         } else {
             Log.e("BluetoothScanner", "Bluetooth is not enabled")
+            Toast.makeText(context, "Bluetooth Not Enabled.", Toast.LENGTH_SHORT).show()
         }
     }
 
