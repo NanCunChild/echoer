@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.util.Log
-import android.widget.Space
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -21,18 +20,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.ModalDrawer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +53,8 @@ import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
 import androidx.compose.runtime.*
+import com.nancunchild.echoer.ui_components.SettingDrawer
+import kotlinx.coroutines.launch
 
 
 class HomeFragment : ComponentActivity() {
@@ -82,169 +83,189 @@ class HomeFragment : ComponentActivity() {
         val scannerViewModel: ScannerViewModel = viewModel()
         val allDevices = scannerViewModel.allScanDevices.observeAsState(emptyList())
 
+        // 创建抽屉的状态对象
+        val scaffoldState = rememberScaffoldState()
+        val scope = rememberCoroutineScope()
 
-
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 设置按钮
-                IconButton(onClick = { }) {
-                    Icon(Icons.Filled.Settings, contentDescription = "Open Settings")
-                }
-
-                // 夜间模式切换按钮
-                IconButton(onClick = { }) {
-                    Icon(Icons.Filled.Star, contentDescription = "Toggle Night Mode")
-                }
+        // 使用ModalDrawer创建抽屉
+        ModalDrawer (
+            drawerState = scaffoldState.drawerState,
+            drawerContentColor = Color.White,
+            drawerContent = {
+                SettingDrawer().Drawer()
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Column {
+                Row(    // top bar
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val image: Painter = painterResource(id = R.drawable.echoer_main_screen_logo)
-                    Image(
-                        painter = image,
-                        contentDescription = "Echoer",
+                    // 设置按钮
+                    IconButton(onClick = {
+                        Log.v("OpenMenu", "Button Clicked")
+                        scope.launch {
+                            scaffoldState.drawerState.open()
+                        }
+                    }) {
+                        Icon(Icons.Filled.Menu, contentDescription = "Open Settings")
+                    }
+
+                    // 夜间模式切换按钮
+                    val image: Painter = painterResource(id = R.drawable.baseline_dark_mode_24)
+                    IconButton(onClick = {
+                        Log.v("ChangeMode", "Button Clicked")
+                    }) {
+                        Icon(image, contentDescription = "Toggle Night Mode")
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        val image: Painter = painterResource(id = R.drawable.echoer_main_screen_logo)
+                        Image(
+                            painter = image,
+                            contentDescription = "Echoer",
+                            modifier = Modifier
+                                .height(64.dp)
+                                .width(64.dp)
+                        )
+                        Text(
+                            text = "ECHOER",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.W800,
+                            modifier = Modifier
+                                .padding(6.dp),
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ExtendedFloatingActionButton(
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_wifi_3_24),
+                                contentDescription = "WiFi",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        },
+                        text = {
+                            Column {
+                                Text(
+                                    text = "WiFi " + currentWiFiState.value,
+                                    fontWeight = FontWeight.W500,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = currentWiFiSSID.value,
+                                    fontWeight = FontWeight.W200,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        },
+                        onClick = {
+                            val intent = Intent(Settings.ACTION_WIFI_SETTINGS)
+                            context.startActivity(intent)
+                        },
+                        containerColor = when (currentWiFiState.value) {
+                            "ON" -> Color(0xFF1E90FF)
+                            "OFF" -> Color(0xFFD0D0D0)
+                            else -> Color(0xFFD0D0D0)
+                        },
+                        contentColor = Color(0xCCFFFFFF),
                         modifier = Modifier
-                            .height(64.dp)
-                            .width(64.dp)
+                            .height(88.dp)
+                            .width(178.dp)
+                            .padding(6.dp)
                     )
-                    Text(
-                        text = "ECHOER",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.W800,
+                    ExtendedFloatingActionButton(
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_bluetooth_24),
+                                contentDescription = "Bluetooth",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        },
+                        text = {
+                            Column {
+                                Text(
+                                    text = "Bluetooth " + bluetoothState.value,
+                                    fontWeight = FontWeight.W500,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = "TEXT",
+                                    fontWeight = FontWeight.W200,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        },
+                        onClick = {
+                            bluetoothAdapter?.let { adapter ->
+                                if (!adapter.isEnabled) {
+                                    // 启动意图提示用户开启蓝牙
+                                    try {
+                                        val enableBtIntent =
+                                            Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                                        context.startActivity(enableBtIntent)
+                                    } catch (e: Exception) {
+                                        Log.v("OpenSetting", "Error in Intent$e")
+                                    }
+
+                                } else {
+                                    Log.d("Bluetooth", "请手动关闭蓝牙或导航到设置页面")
+                                    // 真的无语了，怎么会有打得开关不掉的神奇设定啊卧槽。BYD谷歌不想让开发者开发就别出标准了
+                                    // 可以使用下面的代码片段导航到蓝牙设置页面
+                                    val disableBtIntent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+                                    context.startActivity(disableBtIntent)
+                                }
+                            } ?: run {
+                                // adapter 为 null，处理没有蓝牙适配器的情况
+                                // 不会现在还有安卓设备没有蓝牙吧？没有蓝牙你用个锤子echoer
+                                Log.d("Bluetooth", "No Bluetooth adapter found.")
+                            }
+                        },
+
+                        containerColor = when (bluetoothState.value) {
+                            "ON" -> Color(0xFF1E90FF)
+                            "OFF" -> Color(0xFFD0D0D0)
+                            else -> Color(0xFFD0D0D0)
+                        },
+                        contentColor = Color(0xCCFFFFFF),
                         modifier = Modifier
-                            .padding(6.dp),
+                            .height(88.dp)
+                            .width(178.dp)
+                            .padding(6.dp)
                     )
                 }
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ExtendedFloatingActionButton(
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_wifi_3_24),
-                            contentDescription = "WiFi",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    },
-                    text = {
-                        Column {
-                            Text(
-                                text = "WiFi " + currentWiFiState.value,
-                                fontWeight = FontWeight.W500,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = currentWiFiSSID.value,
-                                fontWeight = FontWeight.W200,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    },
-                    onClick = {
-                        val intent = Intent(Settings.ACTION_WIFI_SETTINGS)
-                        context.startActivity(intent)
-                    },
-                    containerColor = when (currentWiFiState.value) {
-                        "ON" -> Color(0xFF1E90FF)
-                        "OFF" -> Color(0xFFD0D0D0)
-                        else -> Color(0xFFD0D0D0)
-                    },
-                    contentColor = Color(0xCCFFFFFF),
+
+                Row(// Debug Functions
                     modifier = Modifier
-                        .height(88.dp)
-                        .width(178.dp)
-                        .padding(6.dp)
-                )
-                ExtendedFloatingActionButton(
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_bluetooth_24),
-                            contentDescription = "Bluetooth",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    },
-                    text = {
-                        Column {
-                            Text(
-                                text = "Bluetooth " + bluetoothState.value,
-                                fontWeight = FontWeight.W500,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = "TEXT",
-                                fontWeight = FontWeight.W200,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    },
-                    onClick = {
-                        bluetoothAdapter?.let { adapter ->
-                            if (!adapter.isEnabled) {
-                                // 启动意图提示用户开启蓝牙
-                                try {
-                                    val enableBtIntent =
-                                        Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                                    context.startActivity(enableBtIntent)
-                                } catch (e: Exception) {
-                                    Log.v("OpenSetting", "Error in Intent$e")
-                                }
-
-                            } else {
-                                Log.d("Bluetooth", "请手动关闭蓝牙或导航到设置页面")
-                                // 真的无语了，怎么会有打得开关不掉的神奇设定啊卧槽。BYD谷歌不想让开发者开发就别出标准了
-                                // 可以使用下面的代码片段导航到蓝牙设置页面
-                                val disableBtIntent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
-                                context.startActivity(disableBtIntent)
-                            }
-                        } ?: run {
-                            // adapter 为 null，处理没有蓝牙适配器的情况
-                            // 不会现在还有安卓设备没有蓝牙吧？没有蓝牙你用个锤子echoer
-                            Log.d("Bluetooth", "No Bluetooth adapter found.")
-                        }
-                    },
-
-                    containerColor = when (bluetoothState.value) {
-                        "ON" -> Color(0xFF1E90FF)
-                        "OFF" -> Color(0xFFD0D0D0)
-                        else -> Color(0xFFD0D0D0)
-                    },
-                    contentColor = Color(0xCCFFFFFF),
-                    modifier = Modifier
-                        .height(88.dp)
-                        .width(178.dp)
-                        .padding(6.dp)
-                )
-            }
-
-            Row(// Debug Functions
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
 //                Button(onClick = {
 //                    wifiScanner = WiFiScanner(context, scannerViewModel)
 //                    wifiScanner.startScanning()
@@ -257,37 +278,38 @@ class HomeFragment : ComponentActivity() {
 //                }) {
 //                    Text(text = "Bluetooth Scan")
 //                }
-                Spacer(modifier = Modifier)
+                    Spacer(modifier = Modifier)
 
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        mBCScanner = BCScanner(context, scannerViewModel)
-                        wifiScanner = WiFiScanner(context, scannerViewModel)
-                        mBCScanner.startScanning()
-                        wifiScanner.startScanning()
-                    },
-                    modifier = Modifier
-                        .height(52.dp)
-                        .width(144.dp)
-                        .padding(6.dp)
-                ) {
-                    Icon(
-                        Icons.Filled.Refresh,
-                        contentDescription = "Fresh Devices",
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            mBCScanner = BCScanner(context, scannerViewModel)
+                            wifiScanner = WiFiScanner(context, scannerViewModel)
+                            mBCScanner.startScanning()
+                            wifiScanner.startScanning()
+                        },
                         modifier = Modifier
-                            .padding(2.dp)
-                    )
-                    Text(
-                        text = "Refresh",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .padding(2.dp)
-                    )
+                            .height(52.dp)
+                            .width(144.dp)
+                            .padding(6.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Refresh,
+                            contentDescription = "Fresh Devices",
+                            modifier = Modifier
+                                .padding(2.dp)
+                        )
+                        Text(
+                            text = "Refresh",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .padding(2.dp)
+                        )
+                    }
                 }
-            }
 
-            ScannedDevicesList().DevicesList(allDevices.value)
+                ScannedDevicesList().DevicesList(allDevices.value)
+            }
         }
     }
 
