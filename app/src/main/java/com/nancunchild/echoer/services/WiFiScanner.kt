@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.wifi.WifiManager
 import android.util.Log
+import android.widget.Toast
 import com.nancunchild.echoer.adapters.DeviceAdapter
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
@@ -26,6 +27,7 @@ class WiFiScanner(
             } else {
                 // 在某些情况下，即使 EXTRA_RESULTS_UPDATED 为 false，scanResults 也可能包含数据
                 Log.w("WiFiScanner","Scan Failed In Receiver.")
+                Toast.makeText(context, "WiFi Not Enabled.", Toast.LENGTH_SHORT).show()
             }
             val results = wifiManager.scanResults
             val standardizedDeviceData = DeviceAdapter.fromWiFiScanResult(results)

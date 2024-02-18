@@ -7,23 +7,33 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.util.Log
+import android.widget.Space
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +52,9 @@ import com.nancunchild.echoer.ui_components.ScannedDevicesList
 import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
 import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
+
+import androidx.compose.runtime.*
+
 
 class HomeFragment : ComponentActivity() {
     private lateinit var mBCScanner: BCScanner
@@ -69,7 +82,26 @@ class HomeFragment : ComponentActivity() {
         val scannerViewModel: ScannerViewModel = viewModel()
         val allDevices = scannerViewModel.allScanDevices.observeAsState(emptyList())
 
+
+
         Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 设置按钮
+                IconButton(onClick = { }) {
+                    Icon(Icons.Filled.Settings, contentDescription = "Open Settings")
+                }
+
+                // 夜间模式切换按钮
+                IconButton(onClick = { }) {
+                    Icon(Icons.Filled.Star, contentDescription = "Toggle Night Mode")
+                }
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -139,9 +171,8 @@ class HomeFragment : ComponentActivity() {
                     },
                     contentColor = Color(0xCCFFFFFF),
                     modifier = Modifier
-                        .height(IntrinsicSize.Min)
-                        .height(81.dp)
-                        .width(169.dp)
+                        .height(88.dp)
+                        .width(178.dp)
                         .padding(6.dp)
                 )
                 ExtendedFloatingActionButton(
@@ -201,9 +232,8 @@ class HomeFragment : ComponentActivity() {
                     },
                     contentColor = Color(0xCCFFFFFF),
                     modifier = Modifier
-                        .height(IntrinsicSize.Min)
-                        .height(81.dp)
-                        .width(169.dp)
+                        .height(88.dp)
+                        .width(178.dp)
                         .padding(6.dp)
                 )
             }
@@ -215,22 +245,81 @@ class HomeFragment : ComponentActivity() {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = {
-                    wifiScanner = WiFiScanner(context, scannerViewModel)
-                    wifiScanner.startScanning()
-                }) {
-                    Text(text = "WiFi Scan (Test)")
-                }
-                Button(onClick = {
-                    mBCScanner = BCScanner(context, scannerViewModel)
-                    mBCScanner.startScanning()
-                }) {
-                    Text(text = "Bluetooth Scan")
+//                Button(onClick = {
+//                    wifiScanner = WiFiScanner(context, scannerViewModel)
+//                    wifiScanner.startScanning()
+//                }) {
+//                    Text(text = "WiFi Scan (Test)")
+//                }
+//                Button(onClick = {
+//                    mBCScanner = BCScanner(context, scannerViewModel)
+//                    mBCScanner.startScanning()
+//                }) {
+//                    Text(text = "Bluetooth Scan")
+//                }
+                Spacer(modifier = Modifier)
+
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        mBCScanner = BCScanner(context, scannerViewModel)
+                        wifiScanner = WiFiScanner(context, scannerViewModel)
+                        mBCScanner.startScanning()
+                        wifiScanner.startScanning()
+                    },
+                    modifier = Modifier
+                        .height(52.dp)
+                        .width(144.dp)
+                        .padding(6.dp)
+                ) {
+                    Icon(
+                        Icons.Filled.Refresh,
+                        contentDescription = "Fresh Devices",
+                        modifier = Modifier
+                            .padding(2.dp)
+                    )
+                    Text(
+                        text = "Refresh",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .padding(2.dp)
+                    )
                 }
             }
 
             ScannedDevicesList().DevicesList(allDevices.value)
         }
+    }
+
+    @Composable
+    fun DoubleBackToExit(currentActivity: ComponentActivity) {
+        // 获取当前的 Context
+        val context = LocalContext.current
+        // 使用 remember 保存上一次点击返回键的时间
+        var lastBackPressTime by remember { mutableLongStateOf(0L) }
+
+        // 使用 BackHandler 捕获返回键事件
+        BackHandler {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastBackPressTime > 2000) {
+                // 如果两次点击间隔超过 2000 毫秒（2 秒），则不退出应用，而是提示用户
+                Toast.makeText(context, "Tap Again To Exit.", Toast.LENGTH_SHORT).show()
+                lastBackPressTime = currentTime
+            } else {
+                // 如果两次点击间隔小于 2000 毫秒，则退出应用
+                currentActivity.finish()
+            }
+        }
+    }
+
+    @Composable
+    fun InitialScanning(){
+        val context = LocalContext.current
+        val scannerViewModel: ScannerViewModel = viewModel()
+        mBCScanner = BCScanner(context, scannerViewModel)
+        wifiScanner = WiFiScanner(context, scannerViewModel)
+        mBCScanner.startScanning()
+        wifiScanner.startScanning()
     }
 }
 

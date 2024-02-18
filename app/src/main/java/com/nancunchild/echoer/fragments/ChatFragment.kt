@@ -1,4 +1,4 @@
-package com.nancunchild.echoer.theme
+package com.nancunchild.echoer.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,12 +8,10 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import com.nancunchild.echoer.R
+import com.nancunchild.echoer.theme.ChatScreen
 import com.nancunchild.echoer.ui.theme.EchoerTheme
 
 class ChatFragment : Fragment() {
