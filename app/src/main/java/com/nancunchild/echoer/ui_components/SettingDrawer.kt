@@ -1,5 +1,6 @@
 package com.nancunchild.echoer.ui_components
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -33,11 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nancunchild.echoer.R
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
-
-/**
- * TODO:准备在这个类里面放置设置弹出的抽屉
- */
 
 class SettingDrawer {
     @Composable
@@ -65,7 +62,7 @@ class SettingDrawer {
                 ),
             ),
             onItemClick = {
-                println("Clicked on ${it.title}")
+                Log.v("Menu Button", "Clicked on ${it.title}")
             }
         )
     }
@@ -83,28 +80,28 @@ class SettingDrawer {
             ) {
                 Box(
                     modifier = Modifier
-                        .size(96.dp)
                         .border(
                             shape = CircleShape,
-                            border = BorderStroke(4.dp, Color.Black),
+                            border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSurfaceVariant),
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    // val image: Painter = painterResource(id = R.drawable.echoer_main_screen_logo)
+                    val image: Painter =
+                        painterResource(id = R.drawable.echoer_main_screen_logo)
                     Image(
-                        // painter = image,
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = "Echoer",
+                        painter = image,
+                        contentDescription = "Portrait",
                         modifier = Modifier
-                            .height(64.dp)
-                            .width(64.dp)
+                            .height(80.dp)
+                            .width(80.dp)
                     )
                 }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Username",
+                        text = "USERNAME",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.W800,
                         modifier = Modifier.padding(6.dp),
@@ -162,7 +159,7 @@ class SettingDrawer {
                 items = items,
                 itemContent = { item ->
                     val isSelected = selectedItem.value == item
-                    DrawerBodyItem(item, isSelected, onItemClick = {})
+                    DrawerBodyItem(item, isSelected, onItemClick = onItemClick)
                 })
         }
     }
@@ -174,35 +171,35 @@ class SettingDrawer {
         val icon: ImageVector
     )
 
-        @Composable
-        fun DrawerBodyItem(
-            item: DrawerBodyItem,
-            isSelected: Boolean,
-            onItemClick: (DrawerBodyItem) -> Unit
-        ) {
-            val interactionSource = remember { MutableInteractionSource() }
+    @Composable
+    fun DrawerBodyItem(
+        item: DrawerBodyItem,
+        isSelected: Boolean,
+        onItemClick: (DrawerBodyItem) -> Unit
+    ) {
+        val interactionSource = remember { MutableInteractionSource() }
 
-            ListItem(
-                modifier = Modifier
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = rememberRipple(bounded = true, color = Color.LightGray),
-                        onClick = { onItemClick(item) }
-                    )
-                    .padding(3.dp)
-                    .background(Color.White),
-                leadingContent = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.contentDescription
-                    )
-                },
-                headlineContent = {
-                    Text(
-                        text = item.title,
-                        style = TextStyle(fontSize = 16.sp)
-                    )
-                }
-            )
-        }
+        ListItem(
+            modifier = Modifier
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = rememberRipple(bounded = true, color = Color.LightGray),
+                    onClick = { onItemClick(item) }
+                )
+                .padding(3.dp)
+                .background(Color.White),
+            leadingContent = {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = item.contentDescription
+                )
+            },
+            headlineContent = {
+                Text(
+                    text = item.title,
+                    style = TextStyle(fontSize = 16.sp)
+                )
+            }
+        )
+    }
 }

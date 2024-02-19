@@ -11,12 +11,15 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import com.nancunchild.echoer.fragments.HomeFragment
 import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
 import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
 import com.nancunchild.echoer.services.BluetoothStatusMonitor
 import com.nancunchild.echoer.services.WiFiStatusMonitor
 import com.nancunchild.echoer.services.BCScanner
+import com.nancunchild.echoer.ui.theme.EchoerTheme
 import com.nancunchild.echoer.utils.PermissionManager
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
@@ -103,9 +106,13 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            HomeFragment().ScreenLayout()
-            HomeFragment().DoubleBackToExit(this)
-            HomeFragment().InitialScanning()
+//            EchoerTheme() {
+//                Surface(color = MaterialTheme.colorScheme.background ) {
+                    HomeFragment().ScreenLayout()
+                    HomeFragment().DoubleBackToExit(this)
+                    HomeFragment().InitialScanning()
+//                }
+//            }
         }
     }
 

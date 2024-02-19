@@ -1,14 +1,21 @@
 package com.nancunchild.echoer.ui_components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.Wifi
 import com.nancunchild.echoer.R
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -27,7 +34,7 @@ class ScannedDevicesList {
     fun DevicesList(
         devices: List<DeviceAdapter>
     ) {
-        LazyColumn {
+        LazyColumn (modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             items(
                 items = devices,
                 itemContent = { device ->
@@ -55,26 +62,27 @@ class ScannedDevicesList {
                         },
                         leadingContent = {
                             when (device.deviceClass) {
-                                "bluetooth" -> Image(
+                                "bluetooth" -> Icon(
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     painter = painterResource(id = R.drawable.baseline_bluetooth_24),
                                     contentDescription = "Bluetooth Device"
                                 )
 
                                 "wifi" -> when (device.wifiLevel) {
                                     in -50..0 ->
-                                        Image(
+                                        Icon(
                                             painter = painterResource(id = R.drawable.baseline_wifi_3_24),
                                             contentDescription = "WiFi Device"
                                         )
 
                                     in -70..-50 ->
-                                        Image(
+                                        Icon(
                                             painter = painterResource(id = R.drawable.baseline_wifi_2_24),
                                             contentDescription = "WiFi Device"
                                         )
 
                                     in -100..-70 ->
-                                        Image(
+                                        Icon(
                                             painter = painterResource(id = R.drawable.baseline_wifi_1_24),
                                             contentDescription = "WiFi Device"
                                         )
@@ -83,7 +91,7 @@ class ScannedDevicesList {
                                         Text("Error")
                                 }
 
-                                "dual" -> Image(
+                                "dual" -> Icon(
                                     painter = painterResource(id = R.drawable.baseline_bluetooth_wifi_24),
                                     contentDescription = "Unknown Device"
                                 )
