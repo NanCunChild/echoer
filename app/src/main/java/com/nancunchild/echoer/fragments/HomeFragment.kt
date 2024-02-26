@@ -59,6 +59,7 @@ import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
 import androidx.compose.runtime.*
+import com.nancunchild.echoer.activities.ChatActivity
 import com.nancunchild.echoer.ui.theme.EchoerTheme
 import com.nancunchild.echoer.ui_components.SettingDrawer
 import kotlinx.coroutines.launch
@@ -71,7 +72,6 @@ class HomeFragment : ComponentActivity() {
     @SuppressLint("MissingPermission")
     @Composable
     fun ScreenLayout() {
-        //
         var isDarkMode by remember { mutableStateOf(false) }
         EchoerTheme(darkTheme = isDarkMode || isSystemInDarkTheme()) {
             val context = LocalContext.current
@@ -326,7 +326,6 @@ class HomeFragment : ComponentActivity() {
                             )
                         }
                     }
-
                     ScannedDevicesList().DevicesList(allDevices.value)
                 }
             }
