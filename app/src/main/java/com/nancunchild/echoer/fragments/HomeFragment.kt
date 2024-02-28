@@ -35,7 +35,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
@@ -87,7 +87,7 @@ class HomeFragment : ComponentActivity() {
 
             // 存储蓝牙调用上下文
             val bluetoothManager =
-                context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+                context.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
             val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
 
             val scannerViewModel: ScannerViewModel = viewModel()
@@ -331,6 +331,7 @@ class HomeFragment : ComponentActivity() {
             }
         }
     }
+
 
     @Composable
     fun DoubleBackToExit(currentActivity: ComponentActivity) {
