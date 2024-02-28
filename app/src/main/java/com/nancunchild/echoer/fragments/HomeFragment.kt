@@ -35,7 +35,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
@@ -59,6 +59,7 @@ import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
 import androidx.compose.runtime.*
+import com.nancunchild.echoer.activities.ChatActivity
 import com.nancunchild.echoer.ui.theme.EchoerTheme
 import com.nancunchild.echoer.ui_components.SettingDrawer
 import kotlinx.coroutines.launch
@@ -71,7 +72,6 @@ class HomeFragment : ComponentActivity() {
     @SuppressLint("MissingPermission")
     @Composable
     fun ScreenLayout() {
-        //
         var isDarkMode by remember { mutableStateOf(false) }
         EchoerTheme(darkTheme = isDarkMode || isSystemInDarkTheme()) {
             val context = LocalContext.current
@@ -87,7 +87,7 @@ class HomeFragment : ComponentActivity() {
 
             // 存储蓝牙调用上下文
             val bluetoothManager =
-                context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+                context.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
             val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
 
             val scannerViewModel: ScannerViewModel = viewModel()
@@ -326,12 +326,12 @@ class HomeFragment : ComponentActivity() {
                             )
                         }
                     }
-
                     ScannedDevicesList().DevicesList(allDevices.value)
                 }
             }
         }
     }
+
 
     @Composable
     fun DoubleBackToExit(currentActivity: ComponentActivity) {

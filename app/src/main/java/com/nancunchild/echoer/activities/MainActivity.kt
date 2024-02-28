@@ -4,6 +4,7 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.bluetooth.BluetoothManager
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -11,15 +12,14 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import com.nancunchild.echoer.fragments.HomeFragment
 import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
 import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
 import com.nancunchild.echoer.services.BluetoothStatusMonitor
 import com.nancunchild.echoer.services.WiFiStatusMonitor
 import com.nancunchild.echoer.services.BCScanner
-import com.nancunchild.echoer.ui.theme.EchoerTheme
 import com.nancunchild.echoer.utils.PermissionManager
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
 
 
         if (permissionManager.hasPermissions().isEmpty()) {
-            Log.v("PermissionManager","All Permissions granted.")
+            Log.v("PermissionManager", "All Permissions granted.")
             initializeAdapters()
         } else {
             permissionManager.setPermissionAuthResultActor(object :
@@ -106,13 +106,16 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-//            EchoerTheme() {
-//                Surface(color = MaterialTheme.colorScheme.background ) {
-                    HomeFragment().ScreenLayout()
-                    HomeFragment().DoubleBackToExit(this)
-                    HomeFragment().InitialScanning()
-//                }
-//            }
+            HomeFragment().ScreenLayout()
+            HomeFragment().DoubleBackToExit(this)
+            HomeFragment().InitialScanning()
+
+            Button(onClick = {
+                val intent = Intent(this@MainActivity, ChatActivity::class.java)
+                startActivity(intent)
+            }) {
+                Text(text = "GoToChat(debug)")
+            }
         }
     }
 
@@ -136,11 +139,11 @@ class MainActivity : ComponentActivity() {
 
         // 蓝牙扫描器初始化
         mBCScanner = BCScanner(this, scannerViewModel)
-        if(bluetoothAdapter.isEnabled){
-            Log.v("BluetoothScan","Bluetooth Is Enabled. Start Scanning...")
+        if (bluetoothAdapter.isEnabled) {
+            Log.v("BluetoothScan", "Bluetooth Is Enabled. Start Scanning...")
             mBCScanner.startScanning()
-        }else{
-            Log.v("BluetoothScan","Bluetooth Is Not Enabled.")
+        } else {
+            Log.v("BluetoothScan", "Bluetooth Is Not Enabled.")
         }
     }
 
