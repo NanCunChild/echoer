@@ -73,7 +73,7 @@ class HomeFragment : ComponentActivity() {
     fun ScreenLayout() {
         //
         var isDarkMode by remember { mutableStateOf(false) }
-        EchoerTheme(darkTheme = isDarkMode || isSystemInDarkTheme()) {
+        EchoerTheme(darkTheme = isDarkMode) {
             val context = LocalContext.current
             // 获取 ViewModel 实例
             val bluetoothViewModel: BluetoothStatusViewModel = viewModel()
