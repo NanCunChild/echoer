@@ -1,5 +1,6 @@
 package com.nancunchild.echoer.ui_components
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,8 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.nancunchild.echoer.activities.ChatActivity
 import com.nancunchild.echoer.adapters.DeviceAdapter
 
 /**
@@ -34,7 +37,12 @@ class ScannedDevicesList {
     fun DevicesList(
         devices: List<DeviceAdapter>
     ) {
-        LazyColumn (modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        val context = LocalContext.current // 获取当前 Composable 的 Context
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
             items(
                 items = devices,
                 itemContent = { device ->
@@ -97,7 +105,14 @@ class ScannedDevicesList {
                                 )
                             }
                         },
-                        onItemClick = {}
+                        onItemClick = {
+                            val intent = Intent(context, ChatActivity::class.java).apply {
+                                putExtra("deviceName", device.bluetoothName ?: "Unknown")
+                                putExtra("deviceAddress", device.bluetoothAddress ?: "Unknown")
+
+                            }
+                            context.startActivity(intent)
+                        }
                     )
                 })
         }
