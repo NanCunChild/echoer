@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources.Theme
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -71,9 +72,12 @@ class HomeFragment : ComponentActivity() {
 
     @SuppressLint("MissingPermission")
     @Composable
-    fun ScreenLayout() {
-        var isDarkMode by remember { mutableStateOf(false) }
-        EchoerTheme(darkTheme = isDarkMode) {
+    fun ScreenLayout(
+        isDarkMode: Boolean = false,
+        onThemeUpdated: () -> Unit,
+    ) {
+//        var isDarkMode by remember { mutableStateOf(false) }
+//        EchoerTheme(darkTheme = isDarkMode) {
             val context = LocalContext.current
             // 获取 ViewModel 实例
             val bluetoothViewModel: BluetoothStatusViewModel = viewModel()
@@ -96,6 +100,7 @@ class HomeFragment : ComponentActivity() {
             // 创建抽屉的状态对象
             val scaffoldState = rememberScaffoldState()
             val scope = rememberCoroutineScope()
+
 
             // 使用ModalDrawer创建抽屉
             ModalDrawer(
@@ -128,7 +133,9 @@ class HomeFragment : ComponentActivity() {
                         }
 
                         // 夜间模式切换按钮
-                        IconButton(onClick = { isDarkMode = !isDarkMode }) {
+                        IconButton(
+                            onClick = onThemeUpdated
+                        ) {
                             val image = if (isDarkMode) {
                                 Icons.Filled.Nightlight
                             } else {
@@ -326,10 +333,10 @@ class HomeFragment : ComponentActivity() {
                             )
                         }
                     }
-                    ScannedDevicesList().DevicesList(allDevices.value)
+                    ScannedDevicesList().DevicesList(allDevices.value, isDarkMode = isDarkMode)
                 }
             }
-        }
+//        }
     }
 
 

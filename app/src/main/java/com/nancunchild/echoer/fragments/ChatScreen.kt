@@ -1,5 +1,6 @@
 package com.nancunchild.echoer.fragments
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import androidx.activity.ComponentActivity
@@ -27,12 +28,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -55,13 +61,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
 import com.nancunchild.echoer.activities.MainActivity
 import java.io.File
 import java.util.UUID
-import coil.compose.rememberImagePainter
-import coil.request.ImageRequest
 import com.nancunchild.echoer.R
+import com.nancunchild.echoer.ui.theme.EchoerTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -164,7 +168,7 @@ fun SendMessage(onSend: (String) -> Unit) {
                 Text("请输入消息...") // 显示输入提示文本
             }
         )
-        Button(
+        IconButton(
             onClick = {
                 if (text.isNotBlank()) { // 检查输入内容非空
                     onSend(text)
@@ -172,7 +176,11 @@ fun SendMessage(onSend: (String) -> Unit) {
                 }
             }
         ) {
-            Text("发送")
+            Icon(
+                painter = painterResource(id = R.drawable.ic_send),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                contentDescription = "Open Settings"
+            )
         }
     }
 }
@@ -184,12 +192,13 @@ fun BackButton() {
     val context = LocalContext.current
 
     IconButton(onClick = {
-        val intent = Intent(context, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-        context.startActivity(intent)
+//        val intent = Intent(context, MainActivity::class.java)
+//        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+//        context.startActivity(intent)
+        (context as? Activity)?.finish()
     }) {
         Icon(
-            imageVector = Icons.Filled.ArrowBack,
+            painter = painterResource(id = R.drawable.ic_back),
             contentDescription = "Back to Main"
         )
     }
@@ -206,58 +215,75 @@ fun getCurrentTimeString(): String {
 
 
 //展示和测试聊天界面
+ @Preview(showBackground = true)     // 添加后可以在Studio中预览
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen() {
+fun ChatScreen(
+    deviceAddress: String?,
+    deviceName: String?,
+    isDarkMode: Boolean = false,
+) {
     var messages by remember { mutableStateOf(listOf<Message>()) }
     val context = LocalContext.current // 获取当前Composable的Context
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
     // 使用Scaffold布局来固定输入框和发送按钮在底部
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "Chat Screen", color = Color.White) }, // 在Text中直接设置颜色
-                navigationIcon = {
-                    // 调用封装好的返回按钮函数
-                    BackButton()
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary, // 设置TopAppBar的背景颜色
-                    titleContentColor = Color.White // 设置标题颜色
+    EchoerTheme(darkTheme = isDarkMode) {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar (
+                    title = { Text(text = deviceName ?: "Unknown", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // 在Text中直接设置颜色
+                    navigationIcon = {
+                        // 调用封装好的返回按钮函数
+                        BackButton()
+                    },
+//                    colors = TopAppBarDefaults.topAppBarColors(
+//                        containerColor = MaterialTheme.colorScheme.onSurfaceVariant, // 设置TopAppBar的背景颜色
+//                        titleContentColor = Color.White // 设置标题颜色
+//                    )
+                    actions = {
+                        // 夜间模式切换按钮
+                        IconButton(onClick = {}) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_info),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                contentDescription = "Mode info"
+                            )
+                        }
+                    }
                 )
-            )
-        },
-        bottomBar = {
-            SendMessage(onSend = { content ->
-                // 假设使用UUID生成唯一的消息ID，并假设所有消息都是由“我”发送的
-                val newMessage = Message(
-                    id = UUID.randomUUID().toString(),
-                    author = "我",
-                    content = content,
-                    timestamp = getCurrentTimeString(),
-                    isSentByMe = true, // 假设消息总是由用户自己发送
-                    avatarUrl = R.drawable.ali
-                )
-                // 滚动到新消息
-                coroutineScope.launch {
-                    listState.animateScrollToItem(messages.size - 1)
-                }
-                messages = messages + newMessage
-            })
+            },
+            bottomBar = {
+                SendMessage(onSend = { content ->
+                    // 假设使用UUID生成唯一的消息ID，并假设所有消息都是由“我”发送的
+                    val newMessage = Message(
+                        id = UUID.randomUUID().toString(),
+                        author = "我",
+                        content = content,
+                        timestamp = getCurrentTimeString(),
+                        isSentByMe = true, // 假设消息总是由用户自己发送
+                        avatarUrl = R.drawable.ali
+                    )
+                    // 滚动到新消息
+                    coroutineScope.launch {
+                        listState.animateScrollToItem(messages.size - 1)
+                    }
+                    messages = messages + newMessage
+                })
 
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.LightGray) // 设置背景色
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.SpaceBetween // 控制子组件间的垂直布局
-        ) {
-            MessageList(messages = messages)
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+//                    .background(color = MaterialTheme.colorScheme.onSurfaceVariant) // 设置背景色
+                    .padding(innerPadding),
+                verticalArrangement = Arrangement.SpaceBetween // 控制子组件间的垂直布局
+            ) {
+                MessageList(messages = messages)
+            }
         }
     }
 }

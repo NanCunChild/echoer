@@ -14,12 +14,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.nancunchild.echoer.fragments.HomeFragment
 import com.nancunchild.echoer.viewmodels.BluetoothStatusViewModel
 import com.nancunchild.echoer.viewmodels.WiFiStatusViewModel
 import com.nancunchild.echoer.services.BluetoothStatusMonitor
 import com.nancunchild.echoer.services.WiFiStatusMonitor
 import com.nancunchild.echoer.services.BCScanner
+import com.nancunchild.echoer.ui.theme.EchoerTheme
 import com.nancunchild.echoer.utils.PermissionManager
 import com.nancunchild.echoer.viewmodels.ScannerViewModel
 
@@ -106,16 +111,22 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            HomeFragment().ScreenLayout()
-            HomeFragment().DoubleBackToExit(this)
-            HomeFragment().InitialScanning()
-
-            Button(onClick = {
-                val intent = Intent(this@MainActivity, ChatActivity::class.java)
-                startActivity(intent)
-            }) {
-                Text(text = "GoToChat(debug)")
+            var isDarkMode by remember { mutableStateOf(false) }
+            EchoerTheme(darkTheme = isDarkMode) {
+                HomeFragment().ScreenLayout(
+                    isDarkMode = isDarkMode,
+                    onThemeUpdated = { isDarkMode = !isDarkMode }
+                )
+                HomeFragment().DoubleBackToExit(this)
+                HomeFragment().InitialScanning()
             }
+
+//            Button(onClick = {
+//                val intent = Intent(this@MainActivity, ChatActivity::class.java)
+//                startActivity(intent)
+//            }) {
+//                Text(text = "GoToChat(debug)")
+//            }
         }
     }
 

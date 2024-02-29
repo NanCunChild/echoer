@@ -35,7 +35,8 @@ import com.nancunchild.echoer.adapters.DeviceAdapter
 class ScannedDevicesList {
     @Composable
     fun DevicesList(
-        devices: List<DeviceAdapter>
+        devices: List<DeviceAdapter>,
+        isDarkMode: Boolean = false,
     ) {
         val context = LocalContext.current // 获取当前 Composable 的 Context
         LazyColumn(
@@ -109,7 +110,7 @@ class ScannedDevicesList {
                             val intent = Intent(context, ChatActivity::class.java).apply {
                                 putExtra("deviceName", device.bluetoothName ?: "Unknown")
                                 putExtra("deviceAddress", device.bluetoothAddress ?: "Unknown")
-
+                                putExtra("isDarkMode", isDarkMode)
                             }
                             context.startActivity(intent)
                         }
