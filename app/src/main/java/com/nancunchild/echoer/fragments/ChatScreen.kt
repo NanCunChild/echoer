@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,21 +26,24 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.InsertPhoto
+import androidx.compose.material.icons.filled.Mood
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -55,12 +59,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.nancunchild.echoer.activities.MainActivity
 import java.io.File
 import java.util.UUID
@@ -116,9 +122,10 @@ fun MessageRow(message: Message) {
         ) {
             if (message.isSentByMe) {
                 // 对于本人发送的消息，昵称和时间在消息上方显示
-                Text(text = message.author, style = MaterialTheme.typography.bodyMedium)
-                Text(text = message.timestamp, style = MaterialTheme.typography.bodySmall)
+                Text(text = message.author, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Text(text = message.timestamp, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
             }
+            Spacer(modifier = Modifier.width(8.dp)) // 在头像和消息文本之间添加一些间距
 
             // 消息气泡
             Box(
@@ -126,6 +133,7 @@ fun MessageRow(message: Message) {
                     .shadow(4.dp, RoundedCornerShape(8.dp))
                     .background(
                         color = if (message.isSentByMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         shape = RoundedCornerShape(8.dp)
                     )
                     .padding(8.dp)
@@ -135,8 +143,8 @@ fun MessageRow(message: Message) {
 
             if (!message.isSentByMe) {
                 // 对于接收的消息，昵称和时间在消息下方显示
-                Text(text = message.author, style = MaterialTheme.typography.bodyMedium)
-                Text(text = message.timestamp, style = MaterialTheme.typography.bodySmall)
+                Text(text = message.author, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Text(text = message.timestamp, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
             }
         }
 
@@ -150,39 +158,107 @@ fun MessageRow(message: Message) {
 
 //包含文本输入框（TextField）和发送按钮（Button）
 @Composable
-fun SendMessage(onSend: (String) -> Unit) {
+fun UserInput(
+    onSend: (String) -> Unit
+) {
     var text by remember { mutableStateOf("") }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        TextField(
+    Surface(tonalElevation = 2.dp, contentColor = MaterialTheme.colorScheme.secondary) {    // 设置输入框背景色
+        BasicTextField(
             value = text,
-            onValueChange = { text = it },
-            modifier = Modifier.weight(1f),
-            singleLine = true, // 设置为单行输入模式
-            placeholder = {
-                Text("请输入消息...") // 显示输入提示文本
-            }
-        )
-        IconButton(
-            onClick = {
-                if (text.isNotBlank()) { // 检查输入内容非空
-                    onSend(text)
-                    text = "" // 清空输入框
+            onValueChange = {
+                text = it
+            },
+            maxLines = 2,
+            cursorBrush = SolidColor(LocalContentColor.current),
+            textStyle = TextStyle(
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+            decorationBox = { innerTextField ->
+                Column(
+                    modifier = Modifier.
+                        padding(vertical = 10.dp, horizontal = 10.dp),
+                ) {
+                    // 输入框
+                    Box(
+                        modifier = Modifier.
+                            padding(horizontal = 10.dp)
+                            .height(44.dp),
+                    ) {
+                        innerTextField()
+                    }
+
+                    // 下排的按钮
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        // 三个站位按钮
+                        Row(verticalAlignment = Alignment.CenterVertically)  {
+                            IconButton(onClick = {}) { Icon(imageVector = Icons.Filled.Mood, tint = MaterialTheme.colorScheme.onSurfaceVariant, contentDescription = null) }
+                            IconButton(onClick = {}) { Icon(imageVector = Icons.Filled.InsertPhoto, tint = MaterialTheme.colorScheme.onSurfaceVariant, contentDescription = null) }
+                            IconButton(onClick = {}) { Icon(imageVector = Icons.Filled.Place, tint = MaterialTheme.colorScheme.onSurfaceVariant, contentDescription = null) }
+                        }
+
+                        val border = BorderStroke (
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                            )
+
+                        // Send button
+                        Button(
+                            onClick = {
+                                onSend(text)
+                                text = "" // 清空输入框
+                            },
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .height(36.dp),
+                            border = border,
+                        ) {
+                            Text(
+                                text = "Send",
+                                color = Color.Black,
+                            )
+                        }
+                    }
                 }
             }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_send),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                contentDescription = "Open Settings"
             )
         }
-    }
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(8.dp),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            TextField(
+//                value = text,
+//                onValueChange = { text = it },
+//                modifier = Modifier
+//                    .padding(start = 32.dp),
+//                singleLine = true, // 设置为单行输入模式
+//                placeholder = {
+//                    Text("请输入消息...") // 显示输入提示文本
+//                },
+//            )
+//            IconButton(
+//                onClick = {
+//                    if (text.isNotBlank()) { // 检查输入内容非空
+//                        onSend(text)
+//                        text = "" // 清空输入框
+//                    }
+//                }
+//            ) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.ic_send),
+//                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                    contentDescription = "Open Settings"
+//                )
+//            }
+//        }
 }
 
 
@@ -220,8 +296,8 @@ fun getCurrentTimeString(): String {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    deviceAddress: String?,
-    deviceName: String?,
+    deviceAddress: String? = "Unknown",
+    deviceName: String? = "Unknown",
     isDarkMode: Boolean = false,
 ) {
     var messages by remember { mutableStateOf(listOf<Message>()) }
@@ -234,7 +310,7 @@ fun ChatScreen(
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar (
-                    title = { Text(text = deviceName ?: "Unknown", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // 在Text中直接设置颜色
+                    title = { Text(text = deviceName ?: "Unknown", color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold) }, // 在Text中直接设置颜色
                     navigationIcon = {
                         // 调用封装好的返回按钮函数
                         BackButton()
@@ -256,11 +332,11 @@ fun ChatScreen(
                 )
             },
             bottomBar = {
-                SendMessage(onSend = { content ->
+                UserInput(onSend = { content ->
                     // 假设使用UUID生成唯一的消息ID，并假设所有消息都是由“我”发送的
                     val newMessage = Message(
                         id = UUID.randomUUID().toString(),
-                        author = "我",
+                        author = "Me",
                         content = content,
                         timestamp = getCurrentTimeString(),
                         isSentByMe = true, // 假设消息总是由用户自己发送
